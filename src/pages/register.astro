@@ -1,0 +1,126 @@
+---
+import AuthLayout from '../layouts/AuthLayout.astro';
+---
+
+<AuthLayout title="Registrarse">
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <div
+          class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4"
+        >
+          <span class="text-indigo-400 font-bold text-lg font-mono">XP</span>
+        </div>
+        <h1 class="text-xl font-bold text-zinc-100">Crear cuenta</h1>
+        <p class="text-sm text-zinc-500 mt-1">Únete a XP-Flow</p>
+      </div>
+      <div class="rounded-xl bg-zinc-900/80 border border-zinc-800 p-6">
+        <form id="register-form" class="space-y-4">
+          <div>
+            <label for="name" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5"
+              >Nombre</label
+            >
+            <input
+              type="text"
+              id="name"
+              required
+              placeholder="Tu nombre"
+              autocomplete="name"
+              class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none transition-colors text-sm"
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5"
+              >Correo Electrónico</label
+            >
+            <input
+              type="email"
+              id="email"
+              required
+              placeholder="correo@ejemplo.com"
+              autocomplete="email"
+              class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none transition-colors text-sm"
+            />
+          </div>
+          <div>
+            <label for="role" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5"
+              >Rol en el Equipo</label
+            >
+            <select
+              id="role"
+              class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-zinc-100 focus:outline-none transition-colors text-sm"
+            >
+              <option value="Programmer">Programador</option>
+              <option value="Client">Cliente</option>
+              <option value="Coach">Coach (Entrenador)</option>
+              <option value="Tester">Tester (Probador)</option>
+              <option value="Tracker">Tracker (Rastreador)</option>
+            </select>
+          </div>
+          <div>
+            <label for="password" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5"
+              >Contraseña</label
+            >
+            <input
+              type="password"
+              id="password"
+              required
+              minlength="8"
+              placeholder="Mínimo 8 caracteres"
+              autocomplete="new-password"
+              class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none transition-colors text-sm"
+            />
+          </div>
+          <div
+            id="register-error"
+            role="alert"
+            class="hidden text-xs text-rose-400 font-mono bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2"
+          >
+          </div>
+          <button
+            type="submit"
+            class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all cursor-pointer disabled:opacity-50"
+          >
+            Crear Cuenta
+          </button>
+        </form>
+        <div class="mt-4 text-center">
+          <a href="/login" class="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            >¿Ya tienes una cuenta? Inicia sesión</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    import { authApi } from '../api/authApi';
+    import type { UserRole } from '../types';
+
+    const form = document.getElementById('register-form') as HTMLFormElement;
+    const errorDiv = document.getElementById('register-error') as HTMLDivElement;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.classList.add('hidden');
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta...';
+
+      try {
+        const name = (document.getElementById('name') as HTMLInputElement).value;
+        const email = (document.getElementById('email') as HTMLInputElement).value;
+        const password = (document.getElementById('password') as HTMLInputElement).value;
+        const role = (document.getElementById('role') as HTMLSelectElement).value as UserRole;
+
+        await authApi.register({ email, password, name, role });
+        window.location.href = '/dashboard';
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Error al registrarse';
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear Cuenta';
+      }
+    });
+  </script>
+</AuthLayout>

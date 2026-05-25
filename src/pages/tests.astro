@@ -1,0 +1,8 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import TDDDashboard from '../components/tests/TDDDashboard';
+---
+
+<AppLayout title="TDD & Testing" subtitle="Continuous feedback through test-first compliance" currentPath="/tests">
+  <TDDDashboard client:load />
+</AppLayout>

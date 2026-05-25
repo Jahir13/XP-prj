@@ -1,0 +1,8 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import PairDashboard from '../components/pair/PairDashboard';
+---
+
+<AppLayout title="Programación en Pareja" subtitle="Rotación y cobertura de parejas" currentPath="/pairs">
+  <PairDashboard client:load />
+</AppLayout>

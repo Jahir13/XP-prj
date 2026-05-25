@@ -1,0 +1,33 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import IterationBoard from '../components/planning/IterationBoard';
+import { getCollection } from 'astro:content';
+
+const stories = await getCollection('stories');
+const iterations = await getCollection('iterations');
+const activeIteration = iterations.find((i) => i.data.status === 'Active');
+
+// Prepare story data for the React island
+const storyData = stories.map((s) => ({
+  id: s.id,
+  title: s.data.title,
+  points: s.data.points,
+  status: s.data.status,
+  risk: s.data.risk,
+  businessValue: s.data.businessValue,
+  assignedPair: s.data.assignedPair,
+  isTDD: s.data.isTDD,
+}));
+
+const iterationData = activeIteration
+  ? {
+      name: activeIteration.data.name,
+      number: activeIteration.data.number,
+      capacity: activeIteration.data.capacity,
+    }
+  : { name: 'No Active Iteration', number: 0, capacity: 0 };
+---
+
+<AppLayout title="Planning Game" subtitle="Drag stories into the current iteration" currentPath="/planning">
+  <IterationBoard client:load initialStories={storyData} iteration={iterationData} />
+</AppLayout>

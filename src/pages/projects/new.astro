@@ -1,0 +1,76 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="New Project" subtitle="Set up an XP project" currentPath="/projects/new">
+  <div class="max-w-lg mx-auto mt-8">
+    <div class="rounded-xl bg-zinc-900/80 border border-zinc-800 p-6">
+      <h2 class="text-sm font-semibold text-zinc-200 mb-4">Create Project</h2>
+      <form id="create-project-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Project Name</label>
+          <input
+            id="p-name"
+            required
+            placeholder="e.g. XP-Flow"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">System Metaphor</label>
+          <input
+            id="p-metaphor"
+            placeholder="e.g. A factory assembly line"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Cadence</label>
+          <select
+            id="p-cadence"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+          >
+            <option value="1 week">1 week</option>
+            <option value="2 weeks">2 weeks</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+            >Sustainable Pace (hours/week)</label
+          >
+          <input
+            id="p-pace"
+            type="number"
+            value="40"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+          />
+        </div>
+        <div id="create-error" class="hidden text-xs text-rose-400 font-mono"></div>
+        <button
+          type="submit"
+          class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all cursor-pointer"
+          >Create Project</button
+        >
+      </form>
+    </div>
+  </div>
+  <script>
+    import { projectsApi } from '../../api/projectsApi';
+
+    document.getElementById('create-project-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('p-name').value;
+      const metaphor = document.getElementById('p-metaphor').value;
+      const cadence = document.getElementById('p-cadence').value;
+      const sustainablePaceHours = parseInt(document.getElementById('p-pace').value || '40');
+      try {
+        const project = await projectsApi.create({ name, metaphor, cadence, sustainablePaceHours });
+        window.location.href = `/projects/${project.id}`;
+      } catch (err) {
+        const errorEl = document.getElementById('create-error');
+        errorEl.textContent = err.message || 'Failed to create project';
+        errorEl.classList.remove('hidden');
+      }
+    });
+  </script>
+</AppLayout>

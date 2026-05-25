@@ -1,0 +1,102 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+const { id } = Astro.params;
+---
+
+<AppLayout title="Project Home" subtitle={`Project ${id}`} currentPath={`/projects/${id}`} projectId={id}>
+  <div class="max-w-4xl">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <a
+        href={`/projects/${id}/iterations`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3">🎯</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Iterations</h3>
+        <p class="text-xs text-zinc-500 mt-1">Plan and track iterations</p>
+      </a>
+      <a
+        href={`/projects/${id}/stories`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center mb-3">📝</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Stories</h3>
+        <p class="text-xs text-zinc-500 mt-1">Manage the story card file</p>
+      </a>
+      <a
+        href={`/projects/${id}/standup`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-3">⏱</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Standup</h3>
+        <p class="text-xs text-zinc-500 mt-1">Daily standup log</p>
+      </a>
+      <a
+        href={`/projects/${id}/pairs`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center mb-3">👥</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Pair Programming</h3>
+        <p class="text-xs text-zinc-500 mt-1">Track pair sessions</p>
+      </a>
+      <a
+        href={`/projects/${id}/tests`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mb-3">✅</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Tests</h3>
+        <p class="text-xs text-zinc-500 mt-1">Test suite & coverage</p>
+      </a>
+      <a
+        href={`/projects/${id}/ci`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center mb-3">🔧</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">CI/CD</h3>
+        <p class="text-xs text-zinc-500 mt-1">Build pipeline</p>
+      </a>
+      <a
+        href={`/projects/${id}/refactors`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center mb-3">🔄</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Refactoring</h3>
+        <p class="text-xs text-zinc-500 mt-1">Debt & refactor log</p>
+      </a>
+      <a
+        href={`/projects/${id}/team`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center mb-3">👤</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Team</h3>
+        <p class="text-xs text-zinc-500 mt-1">Roles & rotation</p>
+      </a>
+      <a
+        href={`/projects/${id}/retrospective`}
+        class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group"
+      >
+        <div class="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center mb-3">💬</div>
+        <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-white">Retrospectives</h3>
+        <p class="text-xs text-zinc-500 mt-1">Keep / Drop / Try</p>
+      </a>
+    </div>
+
+    <!-- XP Health Summary -->
+    <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5">
+      <h3 class="text-sm font-semibold text-zinc-300 mb-4">XP Health Overview</h3>
+      <div class="grid grid-cols-3 gap-4 text-center" id="health-summary">
+        <div class="p-3 rounded-lg bg-zinc-800/30">
+          <div class="text-2xl font-bold font-mono text-indigo-400">--</div>
+          <div class="text-[10px] text-zinc-500 mt-1">Velocity</div>
+        </div>
+        <div class="p-3 rounded-lg bg-zinc-800/30">
+          <div class="text-2xl font-bold font-mono text-emerald-400">--</div>
+          <div class="text-[10px] text-zinc-500 mt-1">TDD Rate</div>
+        </div>
+        <div class="p-3 rounded-lg bg-zinc-800/30">
+          <div class="text-2xl font-bold font-mono text-amber-400">--</div>
+          <div class="text-[10px] text-zinc-500 mt-1">Pairing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</AppLayout>

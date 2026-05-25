@@ -1,0 +1,135 @@
+---
+import AppLayout from '../../../../../layouts/AppLayout.astro';
+const { id, itId } = Astro.params;
+---
+
+<AppLayout
+  title="Retrospective"
+  subtitle={`Iteration ${itId}`}
+  currentPath={`/projects/${id}/retrospective/${itId}`}
+  projectId={id}
+>
+  <div class="max-w-5xl">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-sm font-semibold text-zinc-300">Keep / Drop / Try</h2>
+      <button
+        id="add-retro-btn"
+        class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all cursor-pointer"
+        >+ Add Entry</button
+      >
+    </div>
+
+    <div id="retro-columns" class="grid grid-cols-3 gap-4">
+      <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50">
+        <div class="px-4 py-3 border-b border-zinc-800/50 bg-emerald-500/5">
+          <h3 class="text-sm font-semibold text-emerald-400">💚 Keep</h3>
+        </div>
+        <div id="keep-items" class="p-3 min-h-[200px] space-y-2"></div>
+      </div>
+      <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50">
+        <div class="px-4 py-3 border-b border-zinc-800/50 bg-rose-500/5">
+          <h3 class="text-sm font-semibold text-rose-400">❌ Drop</h3>
+        </div>
+        <div id="drop-items" class="p-3 min-h-[200px] space-y-2"></div>
+      </div>
+      <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50">
+        <div class="px-4 py-3 border-b border-zinc-800/50 bg-sky-500/5">
+          <h3 class="text-sm font-semibold text-sky-400">🚀 Try</h3>
+        </div>
+        <div id="try-items" class="p-3 min-h-[200px] space-y-2"></div>
+      </div>
+    </div>
+
+    <div id="retro-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onclick="document.getElementById('retro-modal').classList.add('hidden')"
+      >
+      </div>
+      <div class="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+        <h3 class="text-sm font-semibold text-zinc-200 mb-4">Add Entry</h3>
+        <form id="retro-form" class="space-y-3">
+          <select
+            id="retro-category"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-100"
+          >
+            <option value="Keep">💚 Keep</option>
+            <option value="Drop">❌ Drop</option>
+            <option value="Try">🚀 Try</option>
+          </select>
+          <textarea
+            id="retro-content"
+            rows="3"
+            placeholder="What should we keep, drop, or try?"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-100"
+            required></textarea>
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              onclick="document.getElementById('retro-modal').classList.add('hidden')"
+              class="px-4 py-2 rounded-lg bg-zinc-800 text-zinc-400 text-xs">Cancel</button
+            >
+            <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { retroApi } from '../../../../../api/retroApi';
+
+    const projectId = '{id}';
+    const iterationId = '{itId}';
+
+    async function load() {
+      try {
+        const entries = await retroApi.listByIteration(projectId, iterationId);
+        document.getElementById('keep-items')!.innerHTML =
+          entries
+            .filter((e) => e.category === 'Keep')
+            .map(
+              (e) =>
+                `<div class="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10"><p class="text-xs text-zinc-300">${e.content}</p></div>`,
+            )
+            .join('') ||
+          '<div class="flex items-center justify-center h-16 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">No keep items</div>';
+        document.getElementById('drop-items')!.innerHTML =
+          entries
+            .filter((e) => e.category === 'Drop')
+            .map(
+              (e) =>
+                `<div class="p-3 rounded-lg bg-rose-500/5 border border-rose-500/10"><p class="text-xs text-zinc-300">${e.content}</p></div>`,
+            )
+            .join('') ||
+          '<div class="flex items-center justify-center h-16 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">No drop items</div>';
+        document.getElementById('try-items')!.innerHTML =
+          entries
+            .filter((e) => e.category === 'Try')
+            .map(
+              (e) =>
+                `<div class="p-3 rounded-lg bg-sky-500/5 border border-sky-500/10"><p class="text-xs text-zinc-300">${e.content}</p></div>`,
+            )
+            .join('') ||
+          '<div class="flex items-center justify-center h-16 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">No try items</div>';
+      } catch {}
+    }
+    load();
+
+    document
+      .getElementById('add-retro-btn')
+      ?.addEventListener('click', () => document.getElementById('retro-modal')?.classList.remove('hidden'));
+    document.getElementById('retro-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('retro-content').value;
+      const category = document.getElementById('retro-category').value;
+      if (!content.trim()) return;
+      try {
+        await retroApi.create(projectId, iterationId, { category, content, userName: 'You' });
+        document.getElementById('retro-modal')?.classList.add('hidden');
+        document.getElementById('retro-content').value = '';
+        load();
+      } catch {}
+    });
+  </script>
+</AppLayout>

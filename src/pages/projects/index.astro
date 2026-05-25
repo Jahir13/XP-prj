@@ -1,0 +1,62 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Projects" subtitle="Select or create a project" currentPath="/projects">
+  <div class="max-w-4xl">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-sm font-semibold text-zinc-300">Your Projects</h2>
+      <a
+        href="/projects/new"
+        class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all"
+      >
+        + New Project
+      </a>
+    </div>
+    <div class="space-y-3" id="project-list">
+      <!-- populated by client -->
+      <div class="text-center py-16 text-zinc-500 text-sm">Loading projects...</div>
+    </div>
+  </div>
+  <script>
+    import { projectsApi } from '../../api/projectsApi';
+
+    (async () => {
+      try {
+        const projects = await projectsApi.list();
+        const container = document.getElementById('project-list');
+        if (projects.length === 0) {
+          container.innerHTML = `
+            <div class="flex flex-col items-center py-16 rounded-xl border border-dashed border-zinc-800">
+              <span class="text-3xl mb-3">📁</span>
+              <h3 class="text-sm font-semibold text-zinc-400">No projects yet</h3>
+              <p class="text-xs text-zinc-500 mt-1">Create your first XP project to get started</p>
+              <a href="/projects/new" class="mt-4 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold">Create Project</a>
+            </div>`;
+          return;
+        }
+        container.innerHTML = projects
+          .map(
+            (p) => `
+          <a href="/projects/${p.id}" class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-all group">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold font-mono">${p.name.charAt(0)}</div>
+              <div>
+                <div class="text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors">${p.name}</div>
+                <div class="text-xs text-zinc-500 font-mono mt-0.5">${p.memberCount || 0} members · ${p.cadence || '1 week'} cadence</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              ${p.metaphor ? `<span class="text-[10px] text-zinc-600 font-mono">${p.metaphor}</span>` : ''}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-zinc-600"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+          </a>
+        `,
+          )
+          .join('');
+      } catch {
+        /* handle offline */
+      }
+    })();
+  </script>
+</AppLayout>

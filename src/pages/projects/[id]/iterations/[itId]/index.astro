@@ -1,0 +1,169 @@
+---
+import AppLayout from '../../../../../layouts/AppLayout.astro';
+const { id, itId } = Astro.params;
+---
+
+<AppLayout
+  title="Iteration Board"
+  subtitle={`Project ${id} · Iteration ${itId}`}
+  currentPath={`/projects/${id}/iterations/${itId}`}
+  projectId={id}
+>
+  <div id="iteration-board" class="max-w-6xl">
+    <div class="text-center py-16 text-zinc-500 text-sm">Loading iteration board...</div>
+  </div>
+
+  <script>
+    import { iterationsApi } from '../../../../../api/iterationsApi';
+    import { storiesApi } from '../../../../../api/storiesApi';
+    import { connectWs, disconnectWs, onWsEvent } from '../../../../../websocket/client';
+    import { registerWsHandlers } from '../../../../../websocket/events';
+
+    const projectId = '{id}';
+    const iterationId = '{itId}';
+
+    let iteration, stories;
+
+    async function load() {
+      try {
+        [iteration, stories] = await Promise.all([
+          iterationsApi.getById(projectId, iterationId),
+          storiesApi.list(projectId),
+        ]);
+        render();
+      } catch {
+        document.getElementById('iteration-board')!.innerHTML =
+          '<div class="text-center py-16 text-rose-400 text-sm">Failed to load iteration</div>';
+      }
+    }
+
+    function render() {
+      const currentStories = stories.filter((s) => s.iterationId === iterationId);
+      const totalPoints = currentStories.reduce((sum, s) => sum + s.points, 0);
+      const donePoints = currentStories.filter((s) => s.status === 'Done').reduce((sum, s) => sum + s.points, 0);
+      const isOver = totalPoints > iteration.capacity;
+
+      let backlogHtml = '',
+        currentHtml = '',
+        doneHtml = '';
+
+      stories
+        .filter((s) => !s.iterationId || s.iterationId === iterationId)
+        .forEach((s) => {
+          const card = `
+          <div class="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50 mb-2" draggable="true" data-story-id="${s.id}" data-points="${s.points}">
+            <div class="flex justify-between items-start mb-1">
+              <span class="text-sm font-medium text-zinc-200">${s.title}</span>
+              <span class="text-sm font-bold font-mono text-indigo-400">${s.points}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] text-zinc-500">
+              ${s.risk === 'High' ? '🔴' : s.risk === 'Medium' ? '🟡' : '🟢'}
+              ${s.isTDD ? '<span class="text-indigo-400 font-mono">TDD</span>' : ''}
+              ${s.assignedPair?.length ? '👥 ' + s.assignedPair.length : ''}
+            </div>
+          </div>`;
+          if (s.iterationId !== iterationId) backlogHtml += card;
+          else if (s.status === 'Done') doneHtml += card;
+          else currentHtml += card;
+        });
+
+      document.getElementById('iteration-board')!.innerHTML = `
+        <div class="mb-6 p-4 rounded-xl border ${isOver ? 'bg-rose-500/5 border-rose-500/20' : 'bg-zinc-900/60 border-zinc-800'}">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full ${isOver ? 'bg-rose-400 animate-pulse' : 'bg-emerald-400'}"></span>
+              <span class="text-sm font-semibold text-zinc-200">${iteration.name}</span>
+              <span class="text-xs font-mono text-zinc-500">Iter #${iteration.number}</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="text-lg font-bold font-mono ${isOver ? 'text-rose-400' : 'text-zinc-100'}">${totalPoints}</span>
+              <span class="text-sm font-mono text-zinc-500">/ ${iteration.capacity} pts</span>
+              <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-full border ${isOver ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}">
+                ${isOver ? '⚠ OVER CAPACITY' : '✓ ON TRACK'}
+              </span>
+            </div>
+          </div>
+          <div class="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500 ${isOver ? 'bg-gradient-to-r from-rose-500 to-red-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}" style="width:${Math.min(100, (totalPoints / Math.max(iteration.capacity, 1)) * 100)}%"></div>
+          </div>
+          ${isOver ? '<div class="mt-2 text-[11px] text-rose-400 font-mono">⚠ This iteration exceeds capacity. Remove stories or increase capacity.</div>' : ''}
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50">
+            <div class="px-4 py-3 border-b border-zinc-800/50 bg-sky-500/5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-sky-400">Backlog</span>
+              </div>
+            </div>
+            <div class="p-3 min-h-[200px]" data-column="Backlog">${backlogHtml || '<div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">All stories assigned</div>'}</div>
+          </div>
+
+          <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50 border-2 ${isOver ? 'border-rose-500/30' : 'border-amber-500/20'}">
+            <div class="px-4 py-3 border-b border-zinc-800/50 bg-amber-500/5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-amber-400">Current Iteration</span>
+                <span class="text-xs font-mono text-zinc-500">${donePoints} done</span>
+              </div>
+            </div>
+            <div class="p-3 min-h-[200px]" data-column="Current">${currentHtml || '<div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">Drop stories here</div>'}</div>
+          </div>
+
+          <div class="rounded-xl bg-zinc-900/40 border border-zinc-800/50">
+            <div class="px-4 py-3 border-b border-zinc-800/50 bg-emerald-500/5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-emerald-400">Done</span>
+              </div>
+            </div>
+            <div class="p-3 min-h-[200px]" data-column="Done">${doneHtml || '<div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-zinc-700/50 text-xs text-zinc-600">No completed stories</div>'}</div>
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll('[draggable="true"]').forEach((el) => {
+        el.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', el.dataset.storyId);
+          e.dataTransfer.setData('points', el.dataset.points);
+        });
+      });
+
+      document.querySelectorAll('[data-column]').forEach((el) => {
+        el.addEventListener('dragover', (e) => e.preventDefault());
+        el.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          const storyId = e.dataTransfer.getData('text/plain');
+          const storyPoints = parseInt(e.dataTransfer.getData('points') || '0');
+          const targetCol = el.dataset.column;
+          const statusMap = { Backlog: 'Backlog', Current: 'Current', Done: 'Done' };
+          const newStatus = statusMap[targetCol];
+          if (!newStatus || !storyId) return;
+
+          if ((newStatus === 'Current' || newStatus === 'Done') && targetCol !== 'Backlog') {
+            const newTotal = totalPoints + storyPoints;
+            if (newTotal > iteration.capacity && newStatus !== 'Done') {
+              if (
+                !confirm(
+                  `⚠ Adding this story (${storyPoints} pts) will exceed capacity (${iteration.capacity} pts). Assign anyway?`,
+                )
+              )
+                return;
+            }
+          }
+          try {
+            await storiesApi.update(projectId, storyId, { status: newStatus, iterationId });
+            load();
+          } catch {}
+        });
+      });
+    }
+
+    load();
+    const unsubHandlers = registerWsHandlers();
+    const unsubStory = onWsEvent('story:updated', () => load());
+    window.addEventListener('beforeunload', () => {
+      unsubHandlers();
+      unsubStory();
+      disconnectWs();
+    });
+  </script>
+</AppLayout>

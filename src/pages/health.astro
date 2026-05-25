@@ -1,0 +1,71 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import VelocityChart from '../components/health/VelocityChart';
+import BurndownChart from '../components/health/BurndownChart';
+import XPHealthGauges from '../components/health/XPHealthGauges';
+import RefactorTracker from '../components/health/RefactorTracker';
+import { getCollection } from 'astro:content';
+
+const stories = await getCollection('stories');
+const iterations = await getCollection('iterations');
+const logs = await getCollection('logs');
+
+// Prepare data for islands
+const storyData = stories.map((s) => ({
+  id: s.id,
+  title: s.data.title,
+  points: s.data.points,
+  status: s.data.status,
+  assignedPair: s.data.assignedPair,
+  isTDD: s.data.isTDD,
+}));
+
+const iterationData = iterations
+  .map((i) => ({
+    name: i.data.name,
+    number: i.data.number,
+    velocity: i.data.velocity,
+    capacity: i.data.capacity,
+    status: i.data.status,
+    startDate: i.data.startDate.toISOString(),
+    endDate: i.data.endDate.toISOString(),
+  }))
+  .sort((a, b) => a.number - b.number);
+
+const debtData = logs
+  .filter((l) => l.data.type === 'debt' || l.data.type === 'refactor')
+  .map((l) => ({
+    id: l.id,
+    title: l.data.title,
+    type: l.data.type,
+    date: l.data.date.toISOString(),
+    status: l.data.status,
+    relatedStory: l.data.relatedStory || '',
+    participants: l.data.participants,
+  }));
+
+const pairSessions = logs.filter((l) => l.data.type === 'pair-session');
+const totalPairMinutes = pairSessions.reduce((sum, l) => sum + (l.data.durationMinutes || 0), 0);
+---
+
+<AppLayout title="XP Health" subtitle="Practice adherence & team metrics" currentPath="/health">
+  <!-- Gauges Row -->
+  <XPHealthGauges client:visible stories={storyData} totalPairMinutes={totalPairMinutes} />
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-2 gap-6 mt-6">
+    <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5">
+      <h2 class="text-sm font-semibold text-zinc-300 mb-4">Velocity per Iteration</h2>
+      <VelocityChart client:visible iterations={iterationData} />
+    </div>
+    <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5">
+      <h2 class="text-sm font-semibold text-zinc-300 mb-4">Burndown Chart</h2>
+      <BurndownChart client:visible stories={storyData} iterations={iterationData} />
+    </div>
+  </div>
+
+  <!-- Refactor Tracker -->
+  <div class="mt-6">
+    <RefactorTracker client:visible debtItems={debtData} />
+  </div>
+</AppLayout>

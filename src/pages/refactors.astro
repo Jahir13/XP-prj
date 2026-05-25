@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import RefactorsDashboard from '../components/refactors/RefactorsDashboard';
+---
+
+<AppLayout
+  title="Refactoring Register"
+  subtitle="Merciless refactoring to maintain simple design"
+  currentPath="/refactors"
+>
+  <RefactorsDashboard client:load />
+</AppLayout>

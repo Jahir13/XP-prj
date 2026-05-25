@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import TeamDashboard from '../components/team/TeamDashboard';
+---
+
+<AppLayout
+  title="Roster Directory"
+  subtitle="Ensure sustainable pacing and role assignment guidelines"
+  currentPath="/team"
+>
+  <TeamDashboard client:load />
+</AppLayout>

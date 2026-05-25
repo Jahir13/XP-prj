@@ -1,0 +1,23 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import DailyStandup from '../components/team/DailyStandup';
+import { getCollection } from 'astro:content';
+
+const projectEntries = await getCollection('project');
+const project = projectEntries[0];
+
+const teamRoles = project
+  ? project.data.roles
+  : [
+      { name: 'Christian Puchaicela', role: 'Coach' },
+      { name: 'Jahir Rocha', role: 'Client' },
+      { name: 'Ariel Rosas', role: 'Client' },
+      { name: 'Kevin Palacios', role: 'Programmer' },
+      { name: 'Jhonathan Pulig', role: 'Tester' },
+      { name: 'Santiago Pinta', role: 'Tracker' },
+    ];
+---
+
+<AppLayout title="Daily Standup" subtitle="Daily 10-minute coordination meeting" currentPath="/standup">
+  <DailyStandup client:load team={teamRoles} />
+</AppLayout>

@@ -1,0 +1,183 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+
+const typeLabels: Record<string, string> = {
+  'build:failed': 'compilación fallida',
+  'test:failed': 'prueba fallida',
+  'standup:submitted': 'standup enviada',
+  'story:updated': 'historia actualizada',
+  'pair:session:started': 'sesión en pareja iniciada',
+  'retro:created': 'retro creada',
+};
+---
+
+<AppLayout title="Configuración" subtitle="Perfil de usuario y preferencias" currentPath="/settings">
+  <div class="max-w-2xl">
+    <!-- Perfil -->
+    <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 mb-6">
+      <h3 class="text-sm font-semibold text-zinc-300 mb-4">Perfil</h3>
+      <form id="profile-form" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="profile-name" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+              >Nombre</label
+            >
+            <input
+              id="profile-name"
+              type="text"
+              autocomplete="name"
+              class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+            />
+          </div>
+          <div>
+            <label for="profile-email" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+              >Correo Electrónico</label
+            >
+            <input
+              id="profile-email"
+              type="email"
+              autocomplete="email"
+              class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+            />
+          </div>
+        </div>
+        <div>
+          <label for="profile-role" class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+            >Rol</label
+          >
+          <select
+            id="profile-role"
+            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-100"
+          >
+            <option value="Programmer">Programador</option>
+            <option value="Client">Cliente</option>
+            <option value="Coach">Coach (Entrenador)</option>
+            <option value="Tester">Tester (Probador)</option>
+            <option value="Tracker">Tracker (Rastreador)</option>
+          </select>
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all cursor-pointer"
+            >Guardar Cambios</button
+          >
+        </div>
+      </form>
+    </div>
+
+    <!-- Preferencias de Notificación -->
+    <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 mb-6">
+      <h3 class="text-sm font-semibold text-zinc-300 mb-4">Preferencias de Notificación</h3>
+      <form id="notif-form" class="space-y-3">
+        <label class="flex items-center gap-3 p-3 rounded-lg bg-zinc-800/30 cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded text-indigo-500" data-key="email" />
+          <span class="text-sm text-zinc-300">Notificaciones por correo electrónico</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 rounded-lg bg-zinc-800/30 cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded text-indigo-500" data-key="inApp" />
+          <span class="text-sm text-zinc-300">Notificaciones en la aplicación</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 rounded-lg bg-zinc-800/30 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded text-indigo-500" data-key="push" />
+          <span class="text-sm text-zinc-300">Notificaciones push</span>
+        </label>
+        <div class="text-xs text-zinc-500 mt-2 font-mono">Tipos de notificación:</div>
+        <div class="grid grid-cols-2 gap-2">
+          {
+            [
+              'build:failed',
+              'test:failed',
+              'standup:submitted',
+              'story:updated',
+              'pair:session:started',
+              'retro:created',
+            ].map((type) => (
+              <label class="flex items-center gap-2 p-2 rounded-lg bg-zinc-800/20 cursor-pointer">
+                <input type="checkbox" checked class="w-3 h-3 rounded text-indigo-500" data-type={type} />
+                <span class="text-xs text-zinc-400">{typeLabels[type] || type.replace(':', ' ')}</span>
+              </label>
+            ))
+          }
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all cursor-pointer"
+            >Guardar Preferencias</button
+          >
+        </div>
+      </form>
+    </div>
+
+    <!-- Zona de Peligro -->
+    <div class="rounded-xl bg-rose-500/5 border border-rose-500/20 p-5">
+      <h3 class="text-sm font-semibold text-rose-400 mb-2">Zona de Peligro</h3>
+      <p class="text-xs text-zinc-500 mb-3">Cerrar sesión de su cuenta o eliminar sus datos.</p>
+      <div class="flex items-center gap-3">
+        <button
+          id="logout-settings-btn"
+          class="px-4 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold border border-rose-500/20 transition-all cursor-pointer"
+          >Cerrar Sesión</button
+        >
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { usersApi } from '../../api/usersApi';
+    import { notificationsApi } from '../../api/notificationsApi';
+
+    // Load profile
+    (async () => {
+      try {
+        const user = await usersApi.profile();
+        (document.getElementById('profile-name') as HTMLInputElement).value = user.name;
+        (document.getElementById('profile-email') as HTMLInputElement).value = user.email;
+        (document.getElementById('profile-role') as HTMLSelectElement).value = user.role;
+      } catch {
+        console.error('Error al cargar perfil');
+      }
+    })();
+
+    // Load preferences
+    (async () => {
+      try {
+        const prefs = await notificationsApi.preferences();
+        (document.querySelector('[data-key="email"]') as HTMLInputElement).checked = prefs.email;
+        (document.querySelector('[data-key="push"]') as HTMLInputElement).checked = prefs.push;
+        (document.querySelector('[data-key="inApp"]') as HTMLInputElement).checked = prefs.inApp;
+      } catch {
+        console.error('Error al cargar preferencias');
+      }
+    })();
+
+    document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('profile-name') as HTMLInputElement).value;
+      const email = (document.getElementById('profile-email') as HTMLInputElement).value;
+      try {
+        await usersApi.updateProfile({ name, email });
+      } catch {
+        console.error('Error al guardar perfil');
+      }
+    });
+
+    document.getElementById('notif-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await notificationsApi.updatePreferences({
+          email: (document.querySelector('[data-key="email"]') as HTMLInputElement).checked,
+          push: (document.querySelector('[data-key="push"]') as HTMLInputElement).checked,
+          inApp: (document.querySelector('[data-key="inApp"]') as HTMLInputElement).checked,
+        });
+      } catch {
+        console.error('Error al guardar preferencias');
+      }
+    });
+
+    document.getElementById('logout-settings-btn')?.addEventListener('click', () => {
+      window.location.href = '/login';
+    });
+  </script>
+</AppLayout>

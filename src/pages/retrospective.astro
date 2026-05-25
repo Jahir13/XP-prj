@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import RetroDashboard from '../components/retro/RetroDashboard';
+---
+
+<AppLayout
+  title="Planning Retrospective"
+  subtitle="Inspect and adapt team operations weekly"
+  currentPath="/retrospective"
+>
+  <RetroDashboard client:load />
+</AppLayout>

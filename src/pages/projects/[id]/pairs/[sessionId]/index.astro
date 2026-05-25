@@ -1,0 +1,53 @@
+---
+import AppLayout from '../../../../../layouts/AppLayout.astro';
+const { id, sessionId } = Astro.params;
+---
+
+<AppLayout
+  title="Pair Session"
+  subtitle={`Session ${sessionId}`}
+  currentPath={`/projects/${id}/pairs/${sessionId}`}
+  projectId={id}
+>
+  <div id="session-detail" class="max-w-2xl">
+    <div class="text-center py-16 text-zinc-500 text-sm">Loading session...</div>
+  </div>
+
+  <script>
+    import { pairsApi } from '../../../../../api/pairsApi';
+
+    const projectId = '{id}';
+    const sessionId = '{sessionId}';
+
+    async function load() {
+      try {
+        const session = await pairsApi.getById(projectId, sessionId);
+        document.getElementById('session-detail')!.innerHTML = `
+          <a href="/projects/${projectId}/pairs" class="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            Back to Pairs
+          </a>
+          <div class="rounded-xl bg-zinc-900/80 border border-zinc-800 overflow-hidden">
+            <div class="p-6 text-center">
+              <div class="text-4xl mb-4">👥</div>
+              <h2 class="text-lg font-bold text-zinc-100 mb-2">${session.driver} & ${session.navigator}</h2>
+              <div class="flex items-center justify-center gap-3 mb-4">
+                <span class="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 text-sm font-mono">🎮 Driver: ${session.driver}</span>
+                <span class="text-zinc-600">↔</span>
+                <span class="px-3 py-1 rounded-lg bg-violet-500/10 text-violet-300 text-sm font-mono">🧭 Navigator: ${session.navigator}</span>
+              </div>
+              <div class="flex items-center justify-center gap-6 text-sm text-zinc-400">
+                <div><span class="text-zinc-500">Duration:</span> <span class="font-mono text-zinc-200">${session.durationMinutes}m</span></div>
+                <div><span class="text-zinc-500">Status:</span> <span class="font-mono ${session.status === 'Active' ? 'text-emerald-400' : 'text-zinc-400'}">${session.status}</span></div>
+              </div>
+              ${session.storyId ? `<div class="mt-4 text-xs text-zinc-500">Working on story: <a href="/projects/${projectId}/stories/${session.storyId}" class="text-indigo-400 hover:text-indigo-300">View story</a></div>` : ''}
+            </div>
+          </div>`;
+      } catch {
+        document.getElementById('session-detail')!.innerHTML =
+          '<div class="text-center py-16 text-rose-400 text-sm">Session not found</div>';
+      }
+    }
+    load();
+  </script>
+</AppLayout>

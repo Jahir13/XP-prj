@@ -1,0 +1,26 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { getCollection } from 'astro:content';
+import IterationsTimeline from '../components/planning/IterationsTimeline';
+
+const iterations = await getCollection('iterations');
+const stories = await getCollection('stories');
+
+const initialIterations = iterations
+  .map((i) => ({
+    id: i.id,
+    ...i.data,
+    startDate: i.data.startDate.toISOString(),
+    endDate: i.data.endDate.toISOString(),
+  }))
+  .sort((a, b) => a.number - b.number);
+
+const initialStories = stories.map((s) => ({
+  id: s.id,
+  ...s.data,
+}));
+---
+
+<AppLayout title="Iterations" subtitle="Plan and manage small releases" currentPath="/iterations">
+  <IterationsTimeline client:load initialIterations={initialIterations} initialStories={initialStories} />
+</AppLayout>

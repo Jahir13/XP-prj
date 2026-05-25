@@ -1,0 +1,86 @@
+---
+import AppLayout from '../../../../layouts/AppLayout.astro';
+const { id } = Astro.params;
+---
+
+<AppLayout title="Tests" subtitle={`Project ${id}`} currentPath={`/projects/${id}/tests`} projectId={id}>
+  <div class="max-w-4xl">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6" id="test-stats">
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-zinc-100">--</div>
+        <div class="text-[10px] text-zinc-500 mt-1">Total</div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-emerald-400">--</div>
+        <div class="text-[10px] text-zinc-500 mt-1">Passed</div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-rose-400">--</div>
+        <div class="text-[10px] text-zinc-500 mt-1">Failed</div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-sky-400">--%</div>
+        <div class="text-[10px] text-zinc-500 mt-1">Coverage</div>
+      </div>
+    </div>
+
+    <div id="test-list" class="space-y-2">
+      <div class="text-center py-16 text-zinc-500 text-sm">Loading test results...</div>
+    </div>
+  </div>
+
+  <script>
+    import { testsApi } from '../../../../api/testsApi';
+
+    const projectId = '{id}';
+
+    async function load() {
+      try {
+        const [tests, coverage] = await Promise.all([
+          testsApi.list(projectId),
+          testsApi.coverage(projectId).catch(() => null),
+        ]);
+
+        const total = tests.length;
+        const passed = tests.filter((t) => t.status === 'passed').length;
+        const failed = tests.filter((t) => t.status === 'failed').length;
+
+        document.getElementById('test-stats')!.innerHTML = `
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-zinc-100">${total}</div><div class="text-[10px] text-zinc-500 mt-1">Total</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-emerald-400">${passed}</div><div class="text-[10px] text-zinc-500 mt-1">Passed</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-rose-400">${failed}</div><div class="text-[10px] text-zinc-500 mt-1">Failed</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-sky-400">${coverage ? Math.round(coverage.lines) : '--'}%</div><div class="text-[10px] text-zinc-500 mt-1">Coverage</div></div>
+        `;
+
+        if (tests.length === 0) {
+          document.getElementById('test-list')!.innerHTML =
+            '<div class="flex flex-col items-center py-16 rounded-xl border border-dashed border-zinc-800"><span class="text-3xl mb-3">✅</span><h3 class="text-sm font-semibold text-zinc-400">No tests</h3><p class="text-xs text-zinc-500 mt-1">Run your test suite to see results</p></div>';
+        } else {
+          document.getElementById('test-list')!.innerHTML = tests
+            .map(
+              (t) => `
+            <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+              <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full ${t.status === 'passed' ? 'bg-emerald-400' : t.status === 'failed' ? 'bg-rose-400' : 'bg-zinc-600'}"></span>
+                <div>
+                  <span class="text-sm font-medium text-zinc-200">${t.name}</span>
+                  <span class="text-[10px] text-zinc-500 font-mono ml-2">${t.type}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-mono text-zinc-500">${t.durationMs}ms</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-mono ${t.status === 'passed' ? 'bg-emerald-500/10 text-emerald-400' : t.status === 'failed' ? 'bg-rose-500/10 text-rose-400' : 'bg-zinc-800 text-zinc-500'}">${t.status}</span>
+              </div>
+            </div>
+          `,
+            )
+            .join('');
+        }
+      } catch {
+        document.getElementById('test-list')!.innerHTML =
+          '<div class="text-center py-16 text-rose-400 text-sm">Failed to load tests</div>';
+      }
+    }
+    load();
+  </script>
+</AppLayout>

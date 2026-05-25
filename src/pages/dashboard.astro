@@ -1,0 +1,32 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import DashboardStats from '../components/dashboard/DashboardStats';
+import { getCollection } from 'astro:content';
+
+const stories = await getCollection('stories');
+const iterations = await getCollection('iterations');
+const logs = await getCollection('logs');
+const projectEntries = await getCollection('project');
+const project = projectEntries[0];
+
+const initialStories = stories.map((s) => ({ id: s.id, ...s.data }));
+const initialIterations = iterations.map((i) => ({ id: i.id, ...i.data }));
+const initialLogs = logs.map((l) => ({ id: l.id, ...l.data }));
+const projectData = project
+  ? { metaphor: project.data.metaphor, teamName: project.data.teamName || '', roles: project.data.roles || [] }
+  : null;
+---
+
+<AppLayout
+  title="Dashboard"
+  subtitle={project?.data.metaphor ? `Metaphor: ${project.data.metaphor}` : 'XP-Flow'}
+  currentPath="/dashboard"
+>
+  <DashboardStats
+    client:load
+    initialStories={initialStories}
+    initialIterations={initialIterations}
+    initialLogs={initialLogs}
+    project={projectData}
+  />
+</AppLayout>

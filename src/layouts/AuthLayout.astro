@@ -1,0 +1,42 @@
+---
+import '../styles/global.css';
+interface Props {
+  title: string;
+  description?: string;
+}
+const {
+  title,
+  description = 'Inicia sesión o regístrate en XP-Flow para gestionar tus proyectos de Programación Extrema.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es-419">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} — XP-Flow`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={`${title} — XP-Flow`} />
+    <meta name="twitter:description" content={description} />
+    <title>{title} — XP-Flow</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html {
+        background-color: #09090b;
+      }
+    </style>
+  </head>
+  <body class="noise-bg min-h-screen antialiased">
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,106 @@
+---
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+const navItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: 'grid' },
+  { href: '/stories', label: 'Stories', icon: 'file-text' },
+  { href: '/planning', label: 'Planning', icon: 'layout' },
+  { href: '/health', label: 'Health', icon: 'activity' },
+];
+
+const iconPaths: Record<string, string> = {
+  grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  'file-text': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+  layout: 'M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM3 9h18M9 21V9',
+  activity: 'M22 12h-4l-3 9L9 3l-3 9H2',
+};
+---
+
+<nav
+  class="fixed left-0 top-0 h-screen w-16 bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/50 flex flex-col items-center py-6 z-40"
+>
+  <!-- Logo -->
+  <a href="/dashboard" class="mb-8 group">
+    <div
+      class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 transition-all duration-200"
+    >
+      <span class="text-indigo-400 font-bold text-sm font-mono">XP</span>
+    </div>
+  </a>
+
+  <!-- Nav Items -->
+  <div class="flex flex-col items-center gap-1 flex-1">
+    {
+      navItems.map((item) => {
+        const isActive = currentPath.startsWith(item.href);
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group',
+              isActive
+                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50',
+            ]}
+            title={item.label}
+            aria-label={item.label}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d={iconPaths[item.icon]} />
+            </svg>
+
+            {/* Tooltip */}
+            <span class="absolute left-14 px-2 py-1 text-xs font-medium text-zinc-200 bg-zinc-800 border border-zinc-700 rounded-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+              {item.label}
+            </span>
+
+            {/* Active indicator */}
+            {isActive && (
+              <span class="absolute -left-[1px] top-1/2 -translate-y-1/2 w-[2px] h-5 bg-indigo-400 rounded-r" />
+            )}
+          </a>
+        );
+      })
+    }
+  </div>
+
+  <!-- Bottom: Settings -->
+  <div class="mt-auto">
+    <button
+      class="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-all duration-200"
+      title="Settings"
+      aria-label="Settings"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+        ></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </button>
+  </div>
+</nav>

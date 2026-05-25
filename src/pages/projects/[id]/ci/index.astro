@@ -1,0 +1,97 @@
+---
+import AppLayout from '../../../../layouts/AppLayout.astro';
+const { id } = Astro.params;
+---
+
+<AppLayout title="CI/CD Dashboard" subtitle={`Project ${id}`} currentPath={`/projects/${id}/ci`} projectId={id}>
+  <div class="max-w-5xl">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6" id="ci-stats">
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-zinc-100">--</div><div class="text-[10px] text-zinc-500 mt-1">
+          Builds
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-emerald-400">--%</div><div class="text-[10px] text-zinc-500 mt-1">
+          Success Rate
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-amber-400">--</div><div class="text-[10px] text-zinc-500 mt-1">
+          Integrations/day
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div class="text-2xl font-bold font-mono text-sky-400">--s</div><div class="text-[10px] text-zinc-500 mt-1">
+          Avg Duration
+        </div>
+      </div>
+    </div>
+
+    <div id="ci-builds" class="space-y-2">
+      <div class="text-center py-16 text-zinc-500 text-sm">Loading build history...</div>
+    </div>
+  </div>
+
+  <script>
+    import { ciApi } from '../../../../api/ciApi';
+    import { connectWs, onWsEvent } from '../../../../websocket/client';
+
+    const projectId = '{id}';
+
+    async function load() {
+      try {
+        const history = await ciApi.pipelineHistory(projectId);
+        const builds = history.builds || [];
+
+        const successRate = history.successRate || 0;
+        const integrationFreq = history.integrationFrequency || 0;
+        const avgDuration = history.averageDurationMs || 0;
+
+        document.getElementById('ci-stats')!.innerHTML = `
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-zinc-100">${builds.length}</div><div class="text-[10px] text-zinc-500 mt-1">Builds</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-emerald-400">${Math.round(successRate)}%</div><div class="text-[10px] text-zinc-500 mt-1">Success Rate</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-amber-400">${typeof integrationFreq === 'number' ? integrationFreq.toFixed(1) : '--'}</div><div class="text-[10px] text-zinc-500 mt-1">Integrations/day</div></div>
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center"><div class="text-2xl font-bold font-mono text-sky-400">${avgDuration > 0 ? Math.round(avgDuration / 1000) + 's' : '--'}</div><div class="text-[10px] text-zinc-500 mt-1">Avg Duration</div></div>
+        `;
+
+        if (builds.length === 0) {
+          document.getElementById('ci-builds')!.innerHTML =
+            '<div class="flex flex-col items-center py-16 rounded-xl border border-dashed border-zinc-800"><span class="text-3xl mb-3">🔧</span><h3 class="text-sm font-semibold text-zinc-400">No builds yet</h3><p class="text-xs text-zinc-500 mt-1">Push code to trigger your first CI build</p></div>';
+        } else {
+          document.getElementById('ci-builds')!.innerHTML = builds
+            .map(
+              (b) => `
+            <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+              <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full ${b.status === 'success' ? 'bg-emerald-400' : b.status === 'failed' ? 'bg-rose-400' : b.status === 'running' ? 'bg-amber-400 animate-pulse' : 'bg-zinc-600'}"></span>
+                <div>
+                  <span class="text-sm font-medium text-zinc-200">${b.commitMessage || b.branch}</span>
+                  <div class="text-[10px] text-zinc-500 font-mono">
+                    ${b.branch} · ${b.commitSha ? b.commitSha.slice(0, 7) : ''} · ${b.triggeredBy || 'system'}
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-mono text-zinc-500">${b.durationMs ? Math.round(b.durationMs / 1000) + 's' : ''}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-mono ${b.status === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : b.status === 'failed' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : b.status === 'running' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-zinc-800 text-zinc-500'}">${b.status}</span>
+              </div>
+            </div>
+          `,
+            )
+            .join('');
+        }
+      } catch {
+        document.getElementById('ci-builds')!.innerHTML =
+          '<div class="text-center py-16 text-rose-400 text-sm">Failed to load CI data</div>';
+      }
+    }
+    load();
+
+    // Live updates
+    connectWs(import.meta.env.WS_URL || 'ws://localhost:3000/ws', projectId);
+    const unsub = onWsEvent('build:started', () => load());
+    onWsEvent('build:success', () => load());
+    onWsEvent('build:failed', () => load());
+  </script>
+</AppLayout>

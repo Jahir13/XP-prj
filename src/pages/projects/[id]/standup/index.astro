@@ -1,0 +1,153 @@
+---
+import AppLayout from '../../../../layouts/AppLayout.astro';
+const { id } = Astro.params;
+---
+
+<AppLayout title="Daily Standup" subtitle={`Project ${id}`} currentPath={`/projects/${id}/standup`} projectId={id}>
+  <div class="max-w-3xl">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Submit Standup -->
+      <div>
+        <div class="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-zinc-300">Today's Standup</h3>
+            <div id="standup-timer" class="text-lg font-mono font-bold text-indigo-400">15:00</div>
+          </div>
+
+          <form id="standup-form" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+                >What I did yesterday</label
+              >
+              <textarea
+                id="standup-did"
+                rows="2"
+                placeholder="Completed story XP-42, pair programmed with Alice..."
+                class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-sm text-zinc-100 transition-colors"
+                required></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1"
+                >What I'll do today</label
+              >
+              <textarea
+                id="standup-will"
+                rows="2"
+                placeholder="Start story XP-43, refactor auth module..."
+                class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-sm text-zinc-100 transition-colors"
+                required></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Blockers</label>
+              <textarea
+                id="standup-blockers"
+                rows="2"
+                placeholder="Waiting on API review, build failing on CI..."
+                class="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-sm text-zinc-100 transition-colors"
+              ></textarea>
+            </div>
+            <div id="standup-error" class="hidden text-xs text-rose-400 font-mono"></div>
+            <button
+              type="submit"
+              class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all cursor-pointer disabled:opacity-50"
+            >
+              Submit Standup
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Recent Entries -->
+      <div>
+        <div class="rounded-xl bg-zinc-900/60 border border-zinc-800">
+          <div class="px-5 py-4 border-b border-zinc-800/50">
+            <h3 class="text-sm font-semibold text-zinc-300">Recent Standups</h3>
+          </div>
+          <div id="standup-entries" class="divide-y divide-zinc-800/50 max-h-[500px] overflow-y-auto">
+            <div class="px-5 py-8 text-center text-sm text-zinc-500">No standup entries yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { standupApi } from '../../../../api/standupApi';
+
+    const projectId = '{id}';
+
+    // 15-minute countdown timer
+    let timeLeft = 15 * 60;
+    const timerEl = document.getElementById('standup-timer');
+    const timerInterval = setInterval(() => {
+      timeLeft--;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timerEl!.textContent = '00:00';
+        timerEl!.className = 'text-lg font-mono font-bold text-rose-400';
+        document.getElementById('standup-form')?.querySelector('button[type="submit"]')?.click();
+      } else {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        timerEl!.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        if (timeLeft < 60) timerEl!.className = 'text-lg font-mono font-bold text-rose-400';
+        else if (timeLeft < 300) timerEl!.className = 'text-lg font-mono font-bold text-amber-400';
+      }
+    }, 1000);
+
+    async function loadEntries() {
+      try {
+        const entries = await standupApi.listByIteration(projectId, '');
+        if (entries.length > 0) {
+          document.getElementById('standup-entries')!.innerHTML = entries
+            .slice(-10)
+            .reverse()
+            .map(
+              (e) => `
+            <div class="px-5 py-3.5 hover:bg-zinc-800/20 transition-colors">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-medium text-zinc-200">${e.userName}</span>
+                <span class="text-[10px] text-zinc-500 font-mono">${new Date(e.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div class="space-y-1 text-xs text-zinc-400">
+                <div><span class="text-zinc-500">Did:</span> ${e.whatIDid}</div>
+                <div><span class="text-zinc-500">Will:</span> ${e.whatIWillDo}</div>
+                ${e.blockers ? `<div><span class="text-rose-400">Blocked:</span> ${e.blockers}</div>` : ''}
+              </div>
+            </div>
+          `,
+            )
+            .join('');
+        }
+      } catch {}
+    }
+    loadEntries();
+
+    document.getElementById('standup-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const did = (document.getElementById('standup-did') as HTMLTextAreaElement).value;
+      const will = (document.getElementById('standup-will') as HTMLTextAreaElement).value;
+      const blockers = (document.getElementById('standup-blockers') as HTMLTextAreaElement).value;
+      const errorEl = document.getElementById('standup-error')!;
+      const btn = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+      errorEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        await standupApi.create(projectId, { whatIDid: did, whatIWillDo: will, blockers });
+        (document.getElementById('standup-did') as HTMLTextAreaElement).value = '';
+        (document.getElementById('standup-will') as HTMLTextAreaElement).value = '';
+        (document.getElementById('standup-blockers') as HTMLTextAreaElement).value = '';
+        timeLeft = 15 * 60;
+        loadEntries();
+      } catch (err: any) {
+        errorEl.textContent = err.message || 'Failed to submit';
+        errorEl.classList.remove('hidden');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Submit Standup';
+    });
+  </script>
+</AppLayout>

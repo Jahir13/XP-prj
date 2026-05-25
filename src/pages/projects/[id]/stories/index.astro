@@ -1,0 +1,26 @@
+---
+import AppLayout from '../../../../layouts/AppLayout.astro';
+import StoriesList from '../../../../components/stories/StoriesList';
+import { getCollection } from 'astro:content';
+const { id } = Astro.params;
+
+const stories = await getCollection('stories');
+const staticStories = stories.map((s) => ({
+  id: s.id,
+  title: s.data.title,
+  businessValue: s.data.businessValue,
+  risk: s.data.risk as 'Low' | 'Medium' | 'High',
+  points: s.data.points,
+  status: s.data.status as 'Backlog' | 'Current' | 'Done',
+  iteration: s.data.iteration,
+  assignedPair: s.data.assignedPair,
+  isTDD: s.data.isTDD,
+  acceptanceCriteria: s.data.acceptanceCriteria,
+  createdBy: s.data.createdBy as 'Client' | 'Programmer',
+  estimatedBy: s.data.estimatedBy,
+}));
+---
+
+<AppLayout title="Story Backlog" subtitle={`Project ${id}`} currentPath={`/projects/${id}/stories`} projectId={id}>
+  <StoriesList client:load initialStories={staticStories} />
+</AppLayout>

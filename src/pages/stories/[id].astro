@@ -1,0 +1,182 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories');
+  return stories.map((story) => ({
+    params: { id: story.id },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props;
+const { Content } = await render(story);
+
+const statusColors = {
+  Backlog: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+  Current: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Done: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+};
+const riskColors = {
+  Low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  Medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  High: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+};
+---
+
+<AppLayout title={story.data.title} subtitle={`Story · ${story.data.points} pts`} currentPath="/stories">
+  <!-- Back link -->
+  <a
+    href="/stories"
+    class="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg
+    >
+    Back to Stories
+  </a>
+
+  <div class="max-w-3xl">
+    <!-- Card Header -->
+    <div
+      class="rounded-xl bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 overflow-hidden animate-[slide-up_0.3s_ease-out]"
+    >
+      <!-- Status strip -->
+      <div
+        class={`h-1 ${story.data.status === 'Done' ? 'bg-emerald-500' : story.data.status === 'Current' ? 'bg-amber-500' : 'bg-sky-500'}`}
+      >
+      </div>
+
+      <div class="p-6">
+        <!-- Title & Points -->
+        <div class="flex items-start justify-between mb-4">
+          <h2 class="text-xl font-bold text-zinc-100">{story.data.title}</h2>
+          <div class="flex items-center gap-2 flex-shrink-0 ml-4">
+            <span class="text-2xl font-bold font-mono text-indigo-400">{story.data.points}</span>
+            <span class="text-xs text-zinc-500">pts</span>
+          </div>
+        </div>
+
+        <!-- Meta badges -->
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+          <span
+            class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-medium border ${statusColors[story.data.status]}`}
+          >
+            {story.data.status}
+          </span>
+          <span
+            class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-medium border ${riskColors[story.data.risk]}`}
+          >
+            {story.data.risk} Risk
+          </span>
+          {
+            story.data.isTDD && (
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                ✓ Test-First
+              </span>
+            )
+          }
+          <span
+            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-zinc-800 text-zinc-400 border border-zinc-700"
+          >
+            by {story.data.createdBy}
+          </span>
+        </div>
+
+        <!-- Business Value -->
+        <div class="mb-6">
+          <label class="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-2">Business Value</label>
+          <div class="flex items-center gap-1">
+            {
+              Array.from({ length: 5 }).map((_, idx) => (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill={idx < story.data.businessValue ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class={idx < story.data.businessValue ? 'text-amber-400' : 'text-zinc-700'}
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Assigned Pair -->
+        {
+          story.data.assignedPair.length > 0 && (
+            <div class="mb-6">
+              <label class="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-2">Assigned Pair</label>
+              <div class="flex items-center gap-2">
+                {story.data.assignedPair.map((name) => (
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-300 text-sm border border-violet-500/20">
+                    <span>👤</span> {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        <!-- Acceptance Criteria -->
+        {
+          story.data.acceptanceCriteria.length > 0 && (
+            <div class="mb-6">
+              <label class="text-xs text-zinc-500 uppercase tracking-wider font-medium block mb-2">
+                Acceptance Criteria
+              </label>
+              <ul class="space-y-2">
+                {story.data.acceptanceCriteria.map((criteria) => (
+                  <li class="flex items-start gap-2 text-sm text-zinc-300">
+                    <span
+                      class={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                        story.data.status === 'Done'
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                          : 'border-zinc-700 text-transparent'
+                      }`}
+                    >
+                      {story.data.status === 'Done' && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="3"
+                        >
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                      )}
+                    </span>
+                    {criteria}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <!-- Story Body (Rendered Markdown) -->
+    <div
+      class="mt-6 rounded-xl bg-zinc-900/60 border border-zinc-800 p-6 prose prose-invert prose-sm max-w-none prose-headings:text-zinc-200 prose-p:text-zinc-400 prose-strong:text-zinc-200 prose-li:text-zinc-400 prose-a:text-indigo-400 animate-[slide-up_0.4s_ease-out]"
+    >
+      <Content />
+    </div>
+  </div>
+</AppLayout>

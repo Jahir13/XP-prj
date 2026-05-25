@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import CIPipeline from '../components/ci/CIPipeline';
+---
+
+<AppLayout
+  title="Continuous Integration"
+  subtitle="Automated build & test pipelines for fast feedback"
+  currentPath="/ci"
+>
+  <CIPipeline client:load />
+</AppLayout>

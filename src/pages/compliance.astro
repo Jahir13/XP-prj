@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import XPComplianceDashboard from '../components/dashboard/XPComplianceDashboard';
+---
+
+<AppLayout
+  title="Cumplimiento XP"
+  subtitle="Auditoría y Mapeo de Prácticas de Programación Extrema"
+  currentPath="/compliance"
+>
+  <XPComplianceDashboard client:load />
+</AppLayout>
