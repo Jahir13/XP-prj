@@ -381,7 +381,7 @@ export default function DashboardStats({ initialStories, initialIterations, init
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {iterations.map((iter) => {
               const iterStories = stories.filter((s) => {
-                const storyIter = s.iteration || s.iterationId || '';
+                const storyIter = s.iteration || '';
                 return (
                   storyIter === `iteration-${iter.number}` ||
                   storyIter.replace('iteration-', '') === String(iter.number)

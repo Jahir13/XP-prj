@@ -143,9 +143,9 @@ export default function CIPipeline() {
                 setConsoleOutput((prev) => [
                   ...prev,
                   '⚙️  ETAPAS: LIBERACIÓN (RELEASE)',
-                  '   Subiendo distribución estática de producción al proxy CDN local...',
-                  '   Actualizando hashes estáticos de IPFS...',
-                  '   ✓ Compilación de liberación desplegada y en línea en preview.xpflow.local',
+                  '   Subiendo distribución estática de producción a Vercel CDN...',
+                  '   Actualizando hashes estáticos de producción y enrutadores...',
+                  '   ✓ Compilación de liberación desplegada y en línea en https://m-a-proyecto-pb.vercel.app/',
                   '🎉 COMPILACIÓN EXITOSA.',
                 ]);
                 setPipelineState('success');
@@ -373,6 +373,43 @@ export default function CIPipeline() {
                 >
                   {stats.openDebtsCount} {stats.openDebtsCount === 1 ? 'registro' : 'registros'}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Despliegue de Producción (Vercel) */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-md p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-zinc-200">🚀 Despliegue de Producción</h3>
+            <div className="space-y-3 text-xs leading-normal">
+              <div className="flex items-center justify-between border-b border-zinc-800/40 pb-2">
+                <span className="text-zinc-400">Entorno:</span>
+                <span className="font-semibold text-zinc-250">Producción (Vercel)</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-zinc-800/40 pb-2">
+                <span className="text-zinc-400">Estado:</span>
+                <span className="px-2 py-0.5 rounded font-mono text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" /> Activo
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-b border-zinc-800/40 pb-2">
+                <span className="text-zinc-400">Proveedor:</span>
+                <span className="font-mono text-zinc-300 font-semibold">Vercel CDN</span>
+              </div>
+              <div className="flex items-center justify-between border-b border-zinc-800/40 pb-2">
+                <span className="text-zinc-400">Rama CI/CD:</span>
+                <span className="font-mono text-indigo-400 font-bold">main</span>
+              </div>
+              <div className="pt-1 flex flex-col gap-1.5">
+                <span className="text-zinc-500 text-[10px] uppercase tracking-wider font-mono">Enlace Oficial:</span>
+                <a
+                  href="https://m-a-proyecto-pb.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-indigo-400 hover:text-indigo-350 text-xs font-mono font-semibold transition-colors truncate block"
+                  title="Abrir despliegue de Vercel"
+                >
+                  m-a-proyecto-pb.vercel.app ↗
+                </a>
               </div>
             </div>
           </div>

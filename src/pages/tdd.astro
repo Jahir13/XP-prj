@@ -1,0 +1,12 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import TDDTraceabilityDashboard from '../components/tests/TDDTraceabilityDashboard';
+---
+
+<AppLayout
+  title="Desarrollo Pruebas (TDD)"
+  subtitle="Trazabilidad del código fuente y cumplimiento del ciclo TDD"
+  currentPath="/tdd"
+>
+  <TDDTraceabilityDashboard client:load />
+</AppLayout>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import type { RuntimeStory } from '../../store/stories';
 import { updateStory } from '../../store/stories';
@@ -8,6 +8,7 @@ import { $currentUser } from '../../store/auth';
 interface Props {
   story: RuntimeStory | null;
   onClose: () => void;
+  onEdit?: (story: RuntimeStory) => void;
 }
 
 const statusColors = {
@@ -146,10 +147,19 @@ const possibleFunctionalTests: Record<string, string[]> = {
   ],
 };
 
-export default function StoryDetailDrawer({ story, onClose }: Props) {
+export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
   const history = useStore($sessionHistory);
   const currentUser = useStore($currentUser);
   const [roleError, setRoleError] = useState<string | null>(null);
+
+  const isAuthorizedToEdit = useMemo(() => {
+    return (
+      currentUser?.role === 'Cliente' ||
+      currentUser?.role === 'Gestor' ||
+      currentUser?.name === 'Ariel Rosas' ||
+      currentUser?.name === 'Jahir Rocha'
+    );
+  }, [currentUser]);
   const [checkedCriteria, setCheckedCriteria] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -183,9 +193,17 @@ export default function StoryDetailDrawer({ story, onClose }: Props) {
   const associatedPairs = history.filter((log) => log.relatedStory?.toLowerCase() === story.id.toLowerCase());
 
   const toggleCriterion = (index: number) => {
-    // Only Programmer/Tester (Kevin, Jhonathan) can check criteria
-    if (currentUser?.role !== 'Programmer/Tester') {
-      setRoleError('Acceso Denegado: Solo los programadores/testers (Kevin o Jhonathan) pueden validar criterios.');
+    // Programmer/Tester, Gestor, and Coach can validate criteria
+    const allowedRoles = ['Programmer/Tester', 'Programador/Tester', 'Gestor', 'Coach'];
+    const isAllowed =
+      allowedRoles.includes(currentUser?.role || '') ||
+      currentUser?.name === 'Kevin Palacios' ||
+      currentUser?.name === 'Jhonathan Pulig' ||
+      currentUser?.name === 'Jahir Rocha' ||
+      currentUser?.name === 'Christian Puchaicela';
+
+    if (!isAllowed) {
+      setRoleError('Acceso Denegado: Solo los programadores/testers, el Gestor o el Coach pueden validar criterios.');
       setTimeout(() => setRoleError(null), 4000);
       return;
     }
@@ -245,6 +263,19 @@ export default function StoryDetailDrawer({ story, onClose }: Props) {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {onEdit && isAuthorizedToEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  onEdit(story);
+                  onClose();
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-zinc-150 transition-colors text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-zinc-700/60"
+                title="Editar Historia"
+              >
+                <span>✏️</span> Editar
+              </button>
+            )}
             <a
               href={`/stories/${story.id}`}
               className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"

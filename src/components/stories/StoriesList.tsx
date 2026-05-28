@@ -191,8 +191,13 @@ export default function StoriesList({ initialStories, iteration }: Props) {
   const canMoveCards = useMemo(() => {
     return (
       currentUser?.role === 'Programmer/Tester' ||
+      currentUser?.role === 'Programador/Tester' ||
+      currentUser?.role === 'Gestor' ||
+      currentUser?.role === 'Coach' ||
       currentUser?.name === 'Kevin Palacios' ||
-      currentUser?.name === 'Jhonathan Pulig'
+      currentUser?.name === 'Jhonathan Pulig' ||
+      currentUser?.name === 'Jahir Rocha' ||
+      currentUser?.name === 'Christian Puchaicela'
     );
   }, [currentUser]);
 
@@ -515,7 +520,7 @@ export default function StoriesList({ initialStories, iteration }: Props) {
       </Modal>
 
       {/* Story Detail slide-over drawer */}
-      <StoryDetailDrawer story={selectedStory} onClose={() => setSelectedStory(null)} />
+      <StoryDetailDrawer story={selectedStory} onClose={() => setSelectedStory(null)} onEdit={handleEditClick} />
     </div>
   );
 }
