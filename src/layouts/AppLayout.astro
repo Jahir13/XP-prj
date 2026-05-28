@@ -44,12 +44,23 @@ const isActive = (path: string) => currentPath.startsWith(path);
 
 const navGroups = [
   {
+    label: 'Equipo',
+    items: [{ href: `${pPrefix}/team`, label: 'Equipo', icon: 'users' }],
+  },
+  {
     label: 'Planeación',
     items: [
       { href: `${pPrefix || '/dashboard'}`, label: 'Panel de Control', icon: 'grid' },
       { href: `${pPrefix}/iterations`, label: 'Iteraciones', icon: 'layout' },
-      { href: `${pPrefix}/stories`, label: 'Historias', icon: 'file-text' },
       { href: `${pPrefix}/standup`, label: 'Standup Diaria', icon: 'clock' },
+      { href: `${pPrefix}/stories`, label: 'Historias', icon: 'file-text' },
+    ],
+  },
+  {
+    label: 'Diseño',
+    items: [
+      { href: undefined, label: 'Arquitectura escogida para nuestro proyecto', icon: 'file-text' },
+      { href: undefined, label: 'Low Fidelity', icon: 'file-text' },
     ],
   },
   {
@@ -61,16 +72,19 @@ const navGroups = [
     ],
   },
   {
+    label: 'Testing',
+    items: [
+      { href: undefined, label: 'Plan de pruebas', icon: 'check-square' },
+      { href: undefined, label: 'Pruebas funcionales y de integración', icon: 'check-square' },
+    ],
+  },
+  {
     label: 'Calidad',
     items: [
       { href: `${pPrefix}/ci`, label: 'CI/CD', icon: 'activity' },
       { href: `${pPrefix}/compliance`, label: 'Cumplimiento XP', icon: 'shield-check' },
-      { href: `${pPrefix}/retrospective`, label: 'Retrospectivas', icon: 'message' },
+      { href: undefined, label: 'feedback', icon: 'message' },
     ],
-  },
-  {
-    label: 'Equipo',
-    items: [{ href: `${pPrefix}/team`, label: 'Equipo', icon: 'users' }],
   },
 ];
 
@@ -105,12 +119,6 @@ const iconPaths: Record<string, string> = {
     <meta name="twitter:title" content={`${title} — XP-Flow`} />
     <meta name="twitter:description" content="XP-Flow — Gestión de proyectos bajo Programación Extrema (XP)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <style>
       html {
         background-color: #09090b;
@@ -146,8 +154,8 @@ const iconPaths: Record<string, string> = {
                 </span>
                 <div class="space-y-0.5">
                   {group.items.map((item) => {
-                    const active = isActive(item.href);
-                    return (
+                    const active = item.href ? isActive(item.href) : false;
+                    return item.href ? (
                       <a
                         href={item.href}
                         class:list={[
@@ -174,6 +182,29 @@ const iconPaths: Record<string, string> = {
                         </svg>
                         {item.label}
                       </a>
+                    ) : (
+                      <div
+                        class:list={[
+                          'flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-200 select-none text-zinc-500/80 border border-transparent',
+                        ]}
+                        title={item.label}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d={iconPaths[item.icon]} />
+                        </svg>
+                        <span class="truncate">{item.label}</span>
+                      </div>
                     );
                   })}
                 </div>
