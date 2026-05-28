@@ -153,11 +153,17 @@ export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
   const [roleError, setRoleError] = useState<string | null>(null);
 
   const isAuthorizedToEdit = useMemo(() => {
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+
     return (
-      currentUser?.role === 'Cliente' ||
-      currentUser?.role === 'Gestor' ||
-      currentUser?.name === 'Ariel Rosas' ||
-      currentUser?.name === 'Jahir Rocha'
+      roleLower === 'cliente' ||
+      roleLower === 'gestor' ||
+      xpRoleLower === 'cliente' ||
+      xpRoleLower === 'gestor' ||
+      nameLower === 'ariel rosas' ||
+      nameLower === 'jahir rocha'
     );
   }, [currentUser]);
   const [checkedCriteria, setCheckedCriteria] = useState<Record<number, boolean>>({});
@@ -193,14 +199,18 @@ export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
   const associatedPairs = history.filter((log) => log.relatedStory?.toLowerCase() === story.id.toLowerCase());
 
   const toggleCriterion = (index: number) => {
-    // Programmer/Tester, Gestor, and Coach can validate criteria
-    const allowedRoles = ['Programmer/Tester', 'Programador/Tester', 'Gestor', 'Coach'];
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
+
     const isAllowed =
-      allowedRoles.includes(currentUser?.role || '') ||
-      currentUser?.name === 'Kevin Palacios' ||
-      currentUser?.name === 'Jhonathan Pulig' ||
-      currentUser?.name === 'Jahir Rocha' ||
-      currentUser?.name === 'Christian Puchaicela';
+      allowedRoles.includes(roleLower) ||
+      allowedRoles.includes(xpRoleLower) ||
+      nameLower === 'kevin palacios' ||
+      nameLower === 'jhonathan pulig' ||
+      nameLower === 'jahir rocha' ||
+      nameLower === 'christian puchaicela';
 
     if (!isAllowed) {
       setRoleError('Acceso Denegado: Solo los programadores/testers, el Gestor o el Coach pueden validar criterios.');

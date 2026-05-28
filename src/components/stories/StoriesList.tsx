@@ -180,24 +180,48 @@ export default function StoriesList({ initialStories, iteration }: Props) {
 
   // Authorization checks
   const isAuthorizedToCreate = useMemo(() => {
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+
     return (
-      currentUser?.role === 'Cliente' ||
-      currentUser?.role === 'Gestor' ||
-      currentUser?.name === 'Ariel Rosas' ||
-      currentUser?.name === 'Jahir Rocha'
+      roleLower === 'cliente' ||
+      roleLower === 'gestor' ||
+      xpRoleLower === 'cliente' ||
+      xpRoleLower === 'gestor' ||
+      nameLower === 'ariel rosas' ||
+      nameLower === 'jahir rocha'
+    );
+  }, [currentUser]);
+
+  const isAuthorizedToEdit = useMemo(() => {
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+
+    return (
+      roleLower === 'cliente' ||
+      roleLower === 'gestor' ||
+      xpRoleLower === 'cliente' ||
+      xpRoleLower === 'gestor' ||
+      nameLower === 'ariel rosas' ||
+      nameLower === 'jahir rocha'
     );
   }, [currentUser]);
 
   const canMoveCards = useMemo(() => {
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
+
     return (
-      currentUser?.role === 'Programmer/Tester' ||
-      currentUser?.role === 'Programador/Tester' ||
-      currentUser?.role === 'Gestor' ||
-      currentUser?.role === 'Coach' ||
-      currentUser?.name === 'Kevin Palacios' ||
-      currentUser?.name === 'Jhonathan Pulig' ||
-      currentUser?.name === 'Jahir Rocha' ||
-      currentUser?.name === 'Christian Puchaicela'
+      allowedRoles.includes(roleLower) ||
+      allowedRoles.includes(xpRoleLower) ||
+      nameLower === 'kevin palacios' ||
+      nameLower === 'jhonathan pulig' ||
+      nameLower === 'jahir rocha' ||
+      nameLower === 'christian puchaicela'
     );
   }, [currentUser]);
 
@@ -484,7 +508,7 @@ export default function StoriesList({ initialStories, iteration }: Props) {
           {filteredStories.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
               {filteredStories.map((story) => (
-                <StoryCard key={story.id} story={story} onEdit={handleEditClick} />
+                <StoryCard key={story.id} story={story} onEdit={isAuthorizedToEdit ? handleEditClick : undefined} />
               ))}
             </div>
           ) : (

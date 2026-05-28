@@ -161,10 +161,23 @@ export default function IterationBoard({ initialStories, iteration }: Props) {
     setActiveId(null);
     if (!over) return;
 
-    // Role check: Only Programmer/Tester (Kevin, Jhonathan) can move cards
-    if (currentUser?.role !== 'Programmer/Tester') {
+    // Role check: Programmers, Gestor, and Coach can move cards
+    const roleLower = currentUser?.role?.toLowerCase() || '';
+    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
+    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
+    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
+
+    const isAllowed =
+      allowedRoles.includes(roleLower) ||
+      allowedRoles.includes(xpRoleLower) ||
+      nameLower === 'kevin palacios' ||
+      nameLower === 'jhonathan pulig' ||
+      nameLower === 'jahir rocha' ||
+      nameLower === 'christian puchaicela';
+
+    if (!isAllowed) {
       setRoleError(
-        'Acceso Denegado: Solo los roles Programador/Tester (Kevin Palacios o Jhonathan Pulig) pueden reorganizar o mover historias de usuario en la iteración.',
+        'Acceso Denegado: Solo los programadores/testers, el Gestor o el Coach pueden reorganizar o mover historias de usuario.',
       );
       setTimeout(() => setRoleError(null), 4000);
       return;
