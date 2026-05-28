@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import type { RuntimeStory } from '../../store/stories';
-import { updateStory } from '../../store/stories';
+import { updateStory, removeStory } from '../../store/stories';
 import { $sessionHistory } from '../../store/pairSession';
 
 interface Props {
@@ -262,6 +262,19 @@ export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
                 <span>✏️</span> Editar
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`¿Estás seguro de eliminar la historia ${story.id.toUpperCase()}?`)) {
+                  removeStory(story.id);
+                  onClose();
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-rose-900/40 hover:bg-rose-800/50 text-rose-300 hover:text-rose-200 transition-colors text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-rose-700/40"
+              title="Eliminar Historia"
+            >
+              <span>🗑️</span> Eliminar
+            </button>
             <a
               href={`/stories/${story.id}`}
               className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"

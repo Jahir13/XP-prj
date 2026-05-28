@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import { $runtimeStories, addStory, updateStory, updateStoryStatus, type RuntimeStory } from '../../store/stories';
 import StoryCard from './StoryCard';
@@ -14,8 +14,10 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
+  type DragOverEvent,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -34,13 +36,19 @@ const columnConfig: Record<ColumnId, { label: string; accent: string; dotColor: 
 };
 
 function SortableKanbanCard({ story, onClick }: { story: RuntimeStory; onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: story.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: story.id,
+    data: { type: 'story', story },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.3 : 1,
   };
+
+  // Track mouse position to distinguish click from drag
+  const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
 
   const priorityColors = {
     High: 'bg-rose-500/10 text-rose-400 border-rose-500/25',
@@ -63,7 +71,24 @@ function SortableKanbanCard({ story, onClick }: { story: RuntimeStory; onClick: 
       style={style}
       {...attributes}
       {...listeners}
-      onClick={onClick}
+      onPointerDown={(e) => {
+        mouseDownPos.current = { x: e.clientX, y: e.clientY };
+        // Call dnd-kit listener if present
+        if (listeners?.onPointerDown) {
+          listeners.onPointerDown(e);
+        }
+      }}
+      onPointerUp={(e) => {
+        if (mouseDownPos.current) {
+          const dx = Math.abs(e.clientX - mouseDownPos.current.x);
+          const dy = Math.abs(e.clientY - mouseDownPos.current.y);
+          // Only fire onClick if mouse didn't move significantly (not a drag)
+          if (dx < 5 && dy < 5) {
+            onClick();
+          }
+        }
+        mouseDownPos.current = null;
+      }}
       onKeyDown={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
@@ -136,6 +161,19 @@ function KanbanCardOverlay({ story }: { story: RuntimeStory }) {
   );
 }
 
+/**
+ * Droppable column wrapper — registers each column as a drop target for dnd-kit.
+ */
+function DroppableColumn({ id, children, className }: { id: string; children: React.ReactNode; className?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+
+  return (
+    <div ref={setNodeRef} className={`${className || ''} ${isOver ? 'ring-2 ring-indigo-500/40 bg-indigo-500/5' : ''}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function StoriesList({ initialStories, iteration }: Props) {
   const runtimeStories = useStore($runtimeStories);
 
@@ -150,7 +188,9 @@ export default function StoriesList({ initialStories, iteration }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStory, setEditingStory] = useState<RuntimeStory | null>(null);
   const [selectedStory, setSelectedStory] = useState<RuntimeStory | null>(null);
-  const [roleError, setRoleError] = useState<string | null>(null);
+
+  // Track which column is being hovered during drag
+  const [overColumnId, setOverColumnId] = useState<ColumnId | null>(null);
 
   // Active iteration capacity limit (default 10)
   const activeCapacity = iteration?.capacity ?? 10;
@@ -176,18 +216,8 @@ export default function StoriesList({ initialStories, iteration }: Props) {
     });
   }, [stories, search, iterationFilter, priorityFilter, assignedFilter]);
 
-  // Authorization checks
-  const isAuthorizedToCreate = useMemo(() => {
-    return true;
-  }, []);
-
-  const isAuthorizedToEdit = useMemo(() => {
-    return true;
-  }, []);
-
-  const canMoveCards = useMemo(() => {
-    return true;
-  }, []);
+  // Authorization checks — all open (no restrictions)
+  const isAuthorizedToEdit = true;
 
   const handleSave = (storyData: Omit<RuntimeStory, 'id'> & { id?: string }) => {
     if (storyData.id) {
@@ -205,15 +235,14 @@ export default function StoriesList({ initialStories, iteration }: Props) {
   };
 
   const handleCreateClick = () => {
-    if (!isAuthorizedToCreate) return;
     setEditingStory(null);
     setIsModalOpen(true);
   };
 
-  // DnD-kit setup
+  // DnD-kit setup — distance: 8px prevents accidental drags on click
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor),
   );
 
@@ -227,56 +256,58 @@ export default function StoriesList({ initialStories, iteration }: Props) {
 
   const activeStory = activeDragId ? stories.find((s) => s.id === activeDragId) : null;
 
-  function findColumnForStory(id: string): ColumnId | null {
+  /**
+   * Resolves the target column from a droppable/sortable over ID.
+   * - If the over ID IS a column name → return that column directly.
+   * - If the over ID is a story ID → find which column contains it.
+   */
+  function resolveTargetColumn(overId: string): ColumnId | null {
+    if (['Backlog', 'Current', 'Done'].includes(overId)) {
+      return overId as ColumnId;
+    }
+    // The over element is a story card — find which column it lives in
     for (const col of ['Backlog', 'Current', 'Done'] as ColumnId[]) {
-      if (columns[col].some((s) => s.id === id)) return col;
+      if (columns[col].some((s) => s.id === overId)) return col;
     }
     return null;
   }
 
   function handleDragStart(event: DragStartEvent) {
-    // Check permission immediately on drag start to notify
-    if (!canMoveCards) {
-      setRoleError('Solo los Programadores/Testers pueden cambiar el estado de una historia.');
-      setTimeout(() => setRoleError(null), 4000);
+    setActiveDragId(event.active.id as string);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { over } = event;
+    if (!over) {
+      setOverColumnId(null);
       return;
     }
-    setActiveDragId(event.active.id as string);
+    const col = resolveTargetColumn(over.id as string);
+    setOverColumnId(col);
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveDragId(null);
-    if (!over) return;
+    setOverColumnId(null);
 
-    if (!canMoveCards) {
-      return; // permission denied
-    }
+    if (!over) return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    let targetColumn: ColumnId;
-    if (['Backlog', 'Current', 'Done'].includes(overId)) {
-      targetColumn = overId as ColumnId;
-    } else {
-      const col = findColumnForStory(overId);
-      if (!col) return;
-      targetColumn = col;
-    }
+    const targetColumn = resolveTargetColumn(overId);
+    if (!targetColumn) return;
+
+    // Find the story's current column to avoid no-op updates
+    const currentStory = stories.find((s) => s.id === activeId);
+    if (!currentStory || currentStory.status === targetColumn) return;
 
     updateStoryStatus(activeId, targetColumn);
   }
 
   return (
     <div className="space-y-6">
-      {/* Toast Alert Banner */}
-      {roleError && (
-        <div className="fixed top-20 right-8 z-50 text-xs text-rose-400 font-mono bg-rose-950/90 border border-rose-500/30 p-3.5 rounded-lg shadow-2xl animate-bounce">
-          ⚠️ {roleError}
-        </div>
-      )}
-
       {/* Toolbar / Header Block */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-zinc-900/40 p-4.5 rounded-xl border border-zinc-800/80 backdrop-blur-sm">
         <div className="flex-1 flex flex-col sm:flex-row items-center gap-3">
@@ -359,24 +390,14 @@ export default function StoriesList({ initialStories, iteration }: Props) {
             </button>
           </div>
 
-          {/* Create Button with disabled tooltip support */}
+          {/* Create Button */}
           <div className="relative group">
             <button
               onClick={handleCreateClick}
-              disabled={!isAuthorizedToCreate}
-              className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all ${
-                isAuthorizedToCreate
-                  ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20'
-                  : 'bg-zinc-850 text-zinc-600 border border-zinc-800 cursor-not-allowed'
-              }`}
+              className="flex-shrink-0 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20"
             >
               <span>📝</span> Escribir Historia
             </button>
-            {!isAuthorizedToCreate && (
-              <span className="absolute bottom-full right-0 mb-2 w-52 bg-zinc-950 text-zinc-400 border border-zinc-800 p-2 rounded text-[10px] font-mono leading-normal shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                🔒 Acceso Denegado: Solo el Cliente (Ariel Rosas) o el Gestor (Jahir Rocha) pueden crear historias.
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -387,6 +408,7 @@ export default function StoriesList({ initialStories, iteration }: Props) {
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4" role="list">
@@ -394,26 +416,34 @@ export default function StoriesList({ initialStories, iteration }: Props) {
               const col = columnConfig[colId];
               const colStories = columns[colId];
               const colPoints = colStories.reduce((sum, s) => sum + s.points, 0);
-              const isOver = colPoints > activeCapacity && colId !== 'Done';
+              const isOverCapacity = colPoints > activeCapacity && colId !== 'Done';
+              const isHoveredTarget = overColumnId === colId && activeDragId !== null;
 
               return (
-                <div
+                <DroppableColumn
                   key={colId}
+                  id={colId}
                   className={`rounded-xl border flex flex-col min-h-[480px] overflow-hidden transition-all duration-300 ${
-                    isOver
-                      ? 'bg-rose-950/10 border-rose-500/30 shadow-lg shadow-rose-500/5'
-                      : 'bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm'
+                    isHoveredTarget
+                      ? 'bg-indigo-950/20 border-indigo-500/40 shadow-lg shadow-indigo-500/10'
+                      : isOverCapacity
+                        ? 'bg-rose-950/10 border-rose-500/30 shadow-lg shadow-rose-500/5'
+                        : 'bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm'
                   }`}
                 >
                   {/* Column Header */}
                   <div
                     className={`px-4.5 py-3 border-b flex items-center justify-between transition-colors duration-300 ${
-                      isOver ? 'bg-rose-500/5 border-rose-500/25' : `border-zinc-800 ${col.headerBg}`
+                      isOverCapacity ? 'bg-rose-500/5 border-rose-500/25' : `border-zinc-800 ${col.headerBg}`
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${isOver ? 'bg-rose-500 animate-pulse' : col.dotColor}`} />
-                      <span className={`text-xs font-bold ${isOver ? 'text-rose-400 font-extrabold' : col.accent}`}>
+                      <span
+                        className={`w-2 h-2 rounded-full ${isOverCapacity ? 'bg-rose-500 animate-pulse' : col.dotColor}`}
+                      />
+                      <span
+                        className={`text-xs font-bold ${isOverCapacity ? 'text-rose-400 font-extrabold' : col.accent}`}
+                      >
                         {col.label}
                       </span>
                     </div>
@@ -421,10 +451,10 @@ export default function StoriesList({ initialStories, iteration }: Props) {
                     <div className="flex items-center gap-2 font-mono text-[10px]">
                       <span className="text-zinc-500">{colStories.length}</span>
                       <span className="text-zinc-600">·</span>
-                      <span className={`font-semibold ${isOver ? 'text-rose-400' : 'text-zinc-400'}`}>
+                      <span className={`font-semibold ${isOverCapacity ? 'text-rose-400' : 'text-zinc-400'}`}>
                         {colPoints} pts
                       </span>
-                      {isOver && (
+                      {isOverCapacity && (
                         <span
                           className="px-1.5 py-0.5 rounded text-[8px] bg-rose-500/20 text-rose-400 border border-rose-500/20 animate-pulse font-bold"
                           title={`Capacidad de la Iteración: ${activeCapacity} pts`}
@@ -441,18 +471,24 @@ export default function StoriesList({ initialStories, iteration }: Props) {
                     items={colStories.map((s) => s.id)}
                     strategy={verticalListSortingStrategy}
                   >
-                    <div className="p-3.5 space-y-3 flex-1 overflow-y-auto" id={colId}>
+                    <div className="p-3.5 space-y-3 flex-1 overflow-y-auto">
                       {colStories.map((story) => (
                         <SortableKanbanCard key={story.id} story={story} onClick={() => setSelectedStory(story)} />
                       ))}
                       {colStories.length === 0 && (
-                        <div className="flex items-center justify-center h-32 rounded-lg border border-dashed border-zinc-800 text-zinc-600 text-xs italic">
-                          Sin historias en esta columna
+                        <div
+                          className={`flex items-center justify-center h-32 rounded-lg border border-dashed text-xs italic transition-colors ${
+                            isHoveredTarget
+                              ? 'border-indigo-500/40 text-indigo-400 bg-indigo-500/5'
+                              : 'border-zinc-800 text-zinc-600'
+                          }`}
+                        >
+                          {isHoveredTarget ? '⬇️ Soltar aquí' : 'Sin historias en esta columna'}
                         </div>
                       )}
                     </div>
                   </SortableContext>
-                </div>
+                </DroppableColumn>
               );
             })}
           </div>

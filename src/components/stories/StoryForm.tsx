@@ -42,8 +42,9 @@ export default function StoryForm({ story, teamMembers = defaultTeam, onSave, on
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<string[]>([]);
   const [newCriteria, setNewCriteria] = useState('');
   const [createdBy, setCreatedBy] = useState<'Client' | 'Programmer'>('Client');
+  const [iteration, setIteration] = useState<string>('');
 
-  // Hydrate fields if editing
+  // Hydrate fields if editing, reset to defaults if creating
   useEffect(() => {
     if (story) {
       setTitle(story.title);
@@ -55,6 +56,20 @@ export default function StoryForm({ story, teamMembers = defaultTeam, onSave, on
       setAssignedPair(story.assignedPair);
       setAcceptanceCriteria(story.acceptanceCriteria);
       setCreatedBy(story.createdBy);
+      setIteration(story.iteration || '');
+    } else {
+      // Reset all fields for create mode
+      setTitle('');
+      setPoints(3);
+      setBusinessValue(3);
+      setRisk('Low');
+      setStatus('Backlog');
+      setIsTDD(false);
+      setAssignedPair([]);
+      setAcceptanceCriteria([]);
+      setCreatedBy('Client');
+      setIteration('');
+      setNewCriteria('');
     }
   }, [story]);
 
@@ -97,6 +112,7 @@ export default function StoryForm({ story, teamMembers = defaultTeam, onSave, on
       assignedPair,
       acceptanceCriteria,
       createdBy,
+      iteration: iteration || undefined,
     });
   };
 
@@ -220,8 +236,8 @@ export default function StoryForm({ story, teamMembers = defaultTeam, onSave, on
         </div>
       </div>
 
-      {/* Grid: Status, createdBy, isTDD */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Grid: Status, Iteration, createdBy, isTDD */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Status */}
         <div>
           <label
@@ -239,6 +255,27 @@ export default function StoryForm({ story, teamMembers = defaultTeam, onSave, on
             <option value="Backlog">Backlog (Por hacer)</option>
             <option value="Current">En curso (Esta Iteración)</option>
             <option value="Done">Terminado</option>
+          </select>
+        </div>
+
+        {/* Iteration */}
+        <div>
+          <label
+            htmlFor="story-iteration"
+            className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5"
+          >
+            Iteración
+          </label>
+          <select
+            id="story-iteration"
+            value={iteration}
+            onChange={(e) => setIteration(e.target.value)}
+            className="w-full bg-zinc-950 border border-zinc-800 focus:border-indigo-500 rounded-lg px-3 py-2.5 text-zinc-100 focus:outline-none transition-colors"
+          >
+            <option value="">Sin iteración</option>
+            <option value="iteration-1">Iteración 1</option>
+            <option value="iteration-2">Iteración 2</option>
+            <option value="iteration-3">Iteración 3</option>
           </select>
         </div>
 
