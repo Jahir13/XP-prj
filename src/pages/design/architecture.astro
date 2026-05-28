@@ -1,0 +1,354 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+
+const stackTech = [
+  { capa: 'Frontend / UI', tech: 'React 18 + Astro 6 (Islands Architecture)' },
+  { capa: 'Build Tool', tech: 'Vite (HMR ultra rápido)' },
+  { capa: 'Estilos y Diseño', tech: 'TailwindCSS v4 (Glassmorphism & Temas Oscuros)' },
+  { capa: 'Animaciones y Demo', tech: 'Three.js / React Three Fiber (Landing page visual de MeetingVoice)' },
+  { capa: 'Transcripción de Voz', tech: 'Web Speech API (Speech-to-Text nativa de navegador)' },
+  { capa: 'Persistencia de Datos', tech: 'localStorage (Fase Prototipo) / SQLite e IndexedDB (Producción)' },
+  { capa: 'Procesamiento LLM', tech: 'API de LLM externa (Mocked en desarrollo, proveedor a definir en producción)' },
+];
+
+const pendingDecisions = [
+  {
+    code: 'DT-01',
+    title: 'Migración a API LLM Real',
+    desc: 'Reemplazar las expresiones regulares y mocks de extracción de tareas (HU-04) por llamadas directas a un proveedor de LLM (ej. OpenAI, Anthropic o Gemini) para mayor precisión.',
+    story: 'HU-04',
+    priority: 'Alta',
+    status: 'Pendiente',
+  },
+  {
+    code: 'DT-02',
+    title: 'Base de Datos Persistente Local',
+    desc: 'Reemplazar el uso de localStorage (HU-05) por una solución más robusta y escalable en el cliente como IndexedDB o una base de datos local SQLite para soportar grandes volúmenes de reuniones.',
+    story: 'HU-05',
+    priority: 'Alta',
+    status: 'Pendiente',
+  },
+  {
+    code: 'DT-03',
+    title: 'Implementación de Diarización Real',
+    desc: 'Investigar e integrar una API de diarización de audio de terceros (ej. AssemblyAI o Deepgram) para separar con precisión las voces de los participantes de la reunión (HU-03).',
+    story: 'HU-03',
+    priority: 'Baja',
+    status: 'Backlog',
+  },
+];
+
+const crcCards = [
+  {
+    className: 'SesionReunion',
+    responsibilities:
+      'Iniciar y finalizar la sesión de grabación. Solicitar permisos de micrófono al navegador. Notificar estados de captura.',
+    collaboration: 'Transcripcion',
+  },
+  {
+    className: 'Transcripcion',
+    responsibilities:
+      'Capturar el stream de audio del micrófono. Procesar fragmentos de audio de forma incremental. Acumular y mostrar texto transcribiéndose.',
+    collaboration: 'SesionReunion, ExtractorLLM',
+  },
+  {
+    className: 'ExtractorLLM',
+    responsibilities:
+      'Construir el prompt de extracción. Parsear la respuesta estructurada de la IA. Gestionar y editar los ítems sugeridos antes de su almacenamiento.',
+    collaboration: 'Transcripcion, Clasificador',
+  },
+  {
+    className: 'Clasificador',
+    responsibilities:
+      'Separar con precisión los compromisos de acción (tareas) de las notas de contexto u observaciones generales.',
+    collaboration: 'ExtractorLLM, RepositorioTareas',
+  },
+  {
+    className: 'RepositorioTareas',
+    responsibilities:
+      'Persistir tareas en la base de datos local. Actualizar estados de completado. Ordenar registros por criterios temporales.',
+    collaboration: 'Clasificador, Dashboard',
+  },
+  {
+    className: 'Dashboard',
+    responsibilities:
+      'Renderizar tareas y observaciones ordenadas. Excluir observaciones generales del panel principal de pendientes.',
+    collaboration: 'RepositorioTareas',
+  },
+];
+---
+
+<AppLayout
+  title="Arquitectura del Sistema"
+  subtitle="Estructura técnica y metáfora del software Secretario Inteligente"
+  currentPath="/design/architecture"
+>
+  <div class="space-y-8 max-w-5xl mx-auto">
+    <!-- Section 1: Metaphor -->
+    <section class="space-y-4">
+      <h3 class="text-sm font-semibold uppercase tracking-widest text-zinc-500 font-mono">1. Metáfora del Sistema</h3>
+      <div class="relative overflow-hidden rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-6 backdrop-blur-md">
+        <div class="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-indigo-500/10 blur-xl"></div>
+        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div class="space-y-2 max-w-2xl">
+            <span
+              class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-mono text-[10px] font-bold border border-indigo-500/25"
+              >Metáfora Canónica</span
+            >
+            <h4 class="text-lg font-bold text-zinc-100 font-sans">"Secretario Inteligente de Reuniones"</h4>
+            <p class="text-xs text-zinc-400 leading-relaxed font-sans">
+              Al igual que un secretario experto que asiste de forma silenciosa e inteligente a las juntas de proyecto
+              (escuchando cada detalle, traduciendo el diálogo en actas estructuradas, organizando los acuerdos de forma
+              cronológica en una libreta de pendientes y separando los chismes de las obligaciones reales), nuestro
+              software actúa como ese intermediario de confianza que automatiza la captura del conocimiento para que el
+              equipo de desarrollo pueda concentrarse puramente en escribir software valioso.
+            </p>
+          </div>
+          <span class="text-4xl select-none" role="img" aria-label="Microphone and notebook">🎙️📓</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Stack -->
+    <section class="space-y-4">
+      <h3 class="text-sm font-semibold uppercase tracking-widest text-zinc-500 font-mono">2. Stack Tecnológico</h3>
+      <div class="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-zinc-800 bg-zinc-950/40 font-mono text-zinc-500 uppercase tracking-wider">
+              <th class="py-3 px-4">Capa o Componente</th>
+              <th class="py-3 px-4 font-sans">Tecnología Adoptada (MeetingVoice)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-850 text-zinc-300 font-mono">
+            {
+              stackTech.map((item) => (
+                <tr class="hover:bg-zinc-800/10 transition-colors">
+                  <td class="py-3 px-4 font-semibold text-zinc-400">{item.capa}</td>
+                  <td class="py-3 px-4 text-zinc-200">{item.tech}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Modular Diagram -->
+    <section class="space-y-4">
+      <h3 class="text-sm font-semibold uppercase tracking-widest text-zinc-500 font-mono">
+        3. Diagrama de Módulos del Sistema
+      </h3>
+      <div class="rounded-xl border border-zinc-800 bg-zinc-950/40 p-6 flex flex-col items-center justify-center">
+        <!-- Responsive SVG diagram using modern styles -->
+        <svg viewBox="0 0 800 240" fill="none" class="w-full max-w-3xl filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+          <!-- Flow arrow paths -->
+          <path d="M125 120H155" stroke="#4f46e5" stroke-width="2.5" stroke-dasharray="4 2"></path>
+          <path d="M265 120H295" stroke="#6366f1" stroke-width="2.5"></path>
+          <path d="M405 120H435" stroke="#818cf8" stroke-width="2.5"></path>
+          <path d="M545 120H575" stroke="#a78bfa" stroke-width="2.5"></path>
+          <!-- Split arrows from Clasificador -->
+          <path d="M635 105C660 70 670 60 700 60" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M635 135C660 170 670 180 700 180" stroke="#10b981" stroke-width="2" stroke-linecap="round"></path>
+
+          <!-- Nodes definitions -->
+          <!-- SesionReunion -->
+          <g transform="translate(15, 80)">
+            <rect width="110" height="80" rx="12" fill="#09090b" stroke="#4f46e5" stroke-width="2"></rect>
+            <text
+              x="55"
+              y="32"
+              fill="#f4f4f5"
+              font-size="11"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">SesionReunion</text
+            >
+            <text x="55" y="48" fill="#818cf8" font-size="9" text-anchor="middle" font-family="monospace"
+              >[HU-01] Kevin</text
+            >
+            <text x="55" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Captura Mic</text
+            >
+          </g>
+
+          <!-- Transcripcion -->
+          <g transform="translate(155, 80)">
+            <rect width="110" height="80" rx="12" fill="#09090b" stroke="#6366f1" stroke-width="2"></rect>
+            <text
+              x="55"
+              y="32"
+              fill="#f4f4f5"
+              font-size="11"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">Transcripcion</text
+            >
+            <text x="55" y="48" fill="#818cf8" font-size="9" text-anchor="middle" font-family="monospace"
+              >[HU-02] Kevin</text
+            >
+            <text x="55" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Speech API</text
+            >
+          </g>
+
+          <!-- ExtractorLLM -->
+          <g transform="translate(295, 80)">
+            <rect width="110" height="80" rx="12" fill="#09090b" stroke="#818cf8" stroke-width="2"></rect>
+            <text
+              x="55"
+              y="32"
+              fill="#f4f4f5"
+              font-size="11"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">ExtractorLLM</text
+            >
+            <text x="55" y="48" fill="#a78bfa" font-size="9" text-anchor="middle" font-family="monospace"
+              >[HU-04] Jhonathan</text
+            >
+            <text x="55" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Prompt & Parse</text
+            >
+          </g>
+
+          <!-- Clasificador -->
+          <g transform="translate(435, 80)">
+            <rect width="110" height="80" rx="12" fill="#09090b" stroke="#a78bfa" stroke-width="2"></rect>
+            <text
+              x="55"
+              y="32"
+              fill="#f4f4f5"
+              font-size="11"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">Clasificador</text
+            >
+            <text x="55" y="48" fill="#a78bfa" font-size="9" text-anchor="middle" font-family="monospace"
+              >[HU-07] Kevin</text
+            >
+            <text x="55" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Separa Tipos</text
+            >
+          </g>
+
+          <!-- Observaciones Output -->
+          <g transform="translate(680, 20)">
+            <rect width="100" height="80" rx="12" fill="#09090b" stroke="#f59e0b" stroke-width="1.5"></rect>
+            <text
+              x="50"
+              y="32"
+              fill="#f59e0b"
+              font-size="10"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">Observaciones</text
+            >
+            <text x="50" y="48" fill="#818cf8" font-size="8.5" text-anchor="middle" font-family="monospace"
+              >[HU-07] Persist</text
+            >
+            <text x="50" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Historial Obs</text
+            >
+          </g>
+
+          <!-- Tareas / Dashboard Output -->
+          <g transform="translate(680, 140)">
+            <rect width="100" height="80" rx="12" fill="#09090b" stroke="#10b981" stroke-width="1.5"></rect>
+            <text
+              x="50"
+              y="32"
+              fill="#10b981"
+              font-size="10"
+              font-weight="bold"
+              text-anchor="middle"
+              font-family="sans-serif">Tareas / Dashboard</text
+            >
+            <text x="50" y="48" fill="#818cf8" font-size="8.5" text-anchor="middle" font-family="monospace"
+              >[HU-06] Kevin</text
+            >
+            <text x="50" y="62" fill="#71717a" font-size="8" text-anchor="middle" font-family="sans-serif"
+              >Panel Pendientes</text
+            >
+          </g>
+        </svg>
+
+        <p class="text-[10px] text-zinc-500 font-mono mt-4 text-center max-w-xl">
+          El flujo de información inicia con la captura física de audio (`SesionReunion`), procesada incrementalmente
+          (`Transcripcion`) y analizada por el modelo inteligente (`ExtractorLLM`) para finalmente bifurcarse
+          (`Clasificador`) en compromisos específicos (`Tareas`) y resúmenes de contexto (`Observaciones`).
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 4: Technical Decisions -->
+    <section class="space-y-4">
+      <h3 class="text-sm font-semibold uppercase tracking-widest text-zinc-500 font-mono">
+        4. Decisiones Técnicas Pendientes
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {
+          pendingDecisions.map((dt) => (
+            <div class="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4.5 space-y-3 backdrop-blur-sm relative">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded font-mono text-[9px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  {dt.code}
+                </span>
+                <span
+                  class={`px-1.5 py-0.5 rounded font-mono text-[8px] font-bold ${
+                    dt.priority === 'Alta'
+                      ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  }`}
+                >
+                  Prioridad: {dt.priority}
+                </span>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-zinc-200">{dt.title}</h4>
+                <p class="text-[10.5px] text-zinc-400 leading-relaxed font-sans mt-1.5">{dt.desc}</p>
+              </div>
+              <div class="pt-2 border-t border-zinc-850 flex items-center justify-between text-[9px] font-mono">
+                <span class="text-zinc-500">
+                  Historia: <strong class="text-zinc-400">{dt.story}</strong>
+                </span>
+                <span class="text-amber-400/80 bg-amber-500/5 px-1.5 py-0.5 rounded border border-amber-500/10">
+                  {dt.status}
+                </span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Section 5: CRC Cards -->
+    <section class="space-y-4">
+      <h3 class="text-sm font-semibold uppercase tracking-widest text-zinc-500 font-mono">
+        5. Tarjetas CRC (Class-Responsibility-Collaboration)
+      </h3>
+      <div class="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-zinc-800 bg-zinc-950/40 font-mono text-zinc-500 uppercase tracking-wider">
+              <th class="py-3 px-4 w-40">Clase (Class)</th>
+              <th class="py-3 px-4">Responsabilidades (Responsibilities)</th>
+              <th class="py-3 px-4 w-48">Colaboradores (Collaborators)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-850 text-zinc-300 font-sans">
+            {
+              crcCards.map((card) => (
+                <tr class="hover:bg-zinc-800/10 transition-colors">
+                  <td class="py-3.5 px-4 font-mono font-bold text-indigo-400">{card.className}</td>
+                  <td class="py-3.5 px-4 text-zinc-300 leading-normal">{card.responsibilities}</td>
+                  <td class="py-3.5 px-4 font-mono text-zinc-400">{card.collaboration}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</AppLayout>

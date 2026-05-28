@@ -1,0 +1,323 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Prototipos de Baja Fidelidad"
+  subtitle="Wireframes interactivos de flujo y pantallas principales de MeetingVoice"
+  currentPath="/design/lowfidelity"
+>
+  <div class="space-y-10 max-w-5xl mx-auto">
+    <!-- Header info -->
+    <div class="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+      <div>
+        <p class="text-xs text-zinc-500 font-mono">Práctica XP: Diseño Simple & Prototipado Rápido</p>
+      </div>
+      <span class="text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800"
+        >Fase: Iteración 1</span
+      >
+    </div>
+
+    <!-- Wireframes Roster -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Pantalla 1: Landing Page -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-zinc-850 pb-2.5">
+          <span class="text-xs font-bold text-zinc-200 font-mono">[Pantalla 1] Landing Page de MeetingVoice</span>
+          <span
+            class="text-[9px] font-mono text-indigo-400 bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10"
+            >Home</span
+          >
+        </div>
+
+        <!-- Wireframe mock body -->
+        <div class="border border-dashed border-zinc-700/60 rounded-xl p-4 bg-zinc-900/10 space-y-4 text-center">
+          {/* Header placeholder */}
+          <div
+            class="flex items-center justify-between border-b border-dashed border-zinc-800 pb-2 text-[9px] font-mono text-zinc-600"
+          >
+            <span>[Logo] MeetingVoice</span>
+            <div class="flex gap-2">
+              <span>[Características]</span>
+              <span>[Precios]</span>
+              <span>[Iniciar Sesión]</span>
+            </div>
+          </div>
+
+          {/* Hero */}
+          <div class="py-6 space-y-3.5">
+            {/* SVG Microphone central */}
+            <div
+              class="mx-auto w-10 h-10 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#71717a"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+              </svg>
+            </div>
+            <div class="space-y-1.5 max-w-xs mx-auto">
+              <div class="h-4 bg-zinc-800 rounded w-full border border-zinc-700/50"></div>
+              <div class="h-2.5 bg-zinc-800/60 rounded w-3/4 mx-auto"></div>
+            </div>
+
+            <div class="pt-2 flex justify-center gap-2">
+              <div
+                class="h-7 w-24 rounded bg-zinc-700 border border-zinc-600 text-[10px] font-mono flex items-center justify-center text-zinc-400 font-semibold"
+              >
+                [CTA: Registrar]
+              </div>
+              <div
+                class="h-7 w-20 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-mono flex items-center justify-center text-zinc-500"
+              >
+                [Demo]
+              </div>
+            </div>
+          </div>
+
+          {/* Features cards grid */}
+          <div class="grid grid-cols-3 gap-2 border-t border-dashed border-zinc-800 pt-3">
+            <div class="border border-dashed border-zinc-800 rounded p-2 space-y-1 text-left">
+              <div class="h-1.5 bg-zinc-800 rounded w-3/4"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-full"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-5/6"></div>
+            </div>
+            <div class="border border-dashed border-zinc-800 rounded p-2 space-y-1 text-left">
+              <div class="h-1.5 bg-zinc-800 rounded w-2/3"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-full"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-2/3"></div>
+            </div>
+            <div class="border border-dashed border-zinc-800 rounded p-2 space-y-1 text-left">
+              <div class="h-1.5 bg-zinc-800 rounded w-4/5"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-full"></div>
+              <div class="h-1 bg-zinc-800/50 rounded w-3/4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pantalla 2: Grabación de Reunión -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-zinc-850 pb-2.5">
+          <span class="text-xs font-bold text-zinc-200 font-mono">[Pantalla 2] Grabación de Sesión</span>
+          <span
+            class="text-[9px] font-mono text-amber-400 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10"
+            >HU-01 + HU-02</span
+          >
+        </div>
+
+        <!-- Wireframe mock body -->
+        <div class="border border-dashed border-zinc-700/60 rounded-xl p-4 bg-zinc-900/10 space-y-4 text-center">
+          <div
+            class="flex items-center justify-between border-b border-dashed border-zinc-800 pb-2 text-[9px] font-mono text-zinc-600"
+          >
+            <span>[Sesión Activa: 02:45]</span>
+            <span class="text-rose-500 animate-pulse">● GRABANDO</span>
+          </div>
+
+          {/* Transcription Area Box */}
+          <div
+            class="border border-dashed border-zinc-800 rounded-lg p-3 h-28 bg-zinc-950/50 text-left space-y-2 text-[9px] font-mono text-zinc-500 overflow-y-auto"
+          >
+            <p>
+              <span class="text-zinc-400 font-bold">[Participante 1]:</span> Hola, hoy vamos a revisar el diseño de base de
+              datos...
+            </p>
+            <p>
+              <span class="text-zinc-400 font-bold">[Participante 2]:</span> De acuerdo, Kevin debería migrar a IndexedDB
+              esta semana.
+            </p>
+            <div class="h-1 bg-zinc-800 rounded w-1/3 animate-pulse"></div>
+          </div>
+
+          {/* Audio Waves Simulation */}
+          <div class="flex items-center justify-center gap-1 py-1.5 h-6">
+            <span class="h-2 w-1 rounded bg-zinc-700"></span>
+            <span class="h-4 w-1 rounded bg-zinc-600"></span>
+            <span class="h-5 w-1 rounded bg-zinc-500"></span>
+            <span class="h-3 w-1 rounded bg-zinc-600"></span>
+            <span class="h-5 w-1 rounded bg-zinc-500"></span>
+            <span class="h-2 w-1 rounded bg-zinc-700"></span>
+          </div>
+
+          {/* Buttons controls */}
+          <div class="flex gap-2 justify-center">
+            <div
+              class="h-7 w-28 rounded bg-rose-500/10 border border-rose-500/35 text-[9px] font-mono flex items-center justify-center text-rose-400 font-semibold"
+            >
+              [■ Finalizar Reunión]
+            </div>
+            <div
+              class="h-7 w-20 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono flex items-center justify-center text-zinc-400"
+            >
+              [⏸ Pausar]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pantalla 3: Resumen de Extracción -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-zinc-850 pb-2.5">
+          <span class="text-xs font-bold text-zinc-200 font-mono">[Pantalla 3] Resumen de Extracción</span>
+          <span
+            class="text-[9px] font-mono text-indigo-400 bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10"
+            >HU-04</span
+          >
+        </div>
+
+        <!-- Wireframe mock body -->
+        <div class="border border-dashed border-zinc-700/60 rounded-xl p-4 bg-zinc-900/10 space-y-4 text-center">
+          <div
+            class="flex items-center justify-between border-b border-dashed border-zinc-800 pb-2 text-[9px] font-mono text-zinc-600"
+          >
+            <span>[Extracción LLM Completada]</span>
+            <span class="text-emerald-400">✓ PROCESADO</span>
+          </div>
+
+          {/* Task rows list */}
+          <div class="space-y-2 text-left">
+            <div
+              class="border border-dashed border-zinc-800 rounded p-2.5 bg-zinc-950/30 flex items-center justify-between text-[9px] font-mono text-zinc-400"
+            >
+              <div class="space-y-1">
+                <span class="font-bold text-zinc-200">[Tarea 1] Migrar BD a IndexedDB</span>
+                <div class="flex gap-2 text-zinc-500">
+                  <span>Resp: [Kevin Palacios]</span>
+                  <span>Plazo: [2026-05-30]</span>
+                </div>
+              </div>
+              <span class="text-zinc-600 cursor-pointer">[Editar / Eliminar]</span>
+            </div>
+
+            <div
+              class="border border-dashed border-zinc-800 rounded p-2.5 bg-zinc-950/30 flex items-center justify-between text-[9px] font-mono text-zinc-400"
+            >
+              <div class="space-y-1">
+                <span class="font-bold text-zinc-200">[Tarea 2] Definir proveedor LLM</span>
+                <div class="flex gap-2 text-zinc-500">
+                  <span>Resp: [Jahir Rocha]</span>
+                  <span>Plazo: [2026-06-02]</span>
+                </div>
+              </div>
+              <span class="text-zinc-600 cursor-pointer">[Editar / Eliminar]</span>
+            </div>
+          </div>
+
+          {/* Bottom actions */}
+          <div class="flex justify-between items-center border-t border-dashed border-zinc-800 pt-2.5">
+            <div
+              class="h-6 w-20 rounded bg-zinc-850 border border-zinc-700 text-[8px] font-mono flex items-center justify-center text-zinc-400"
+            >
+              [+ Añadir manual]
+            </div>
+            <div
+              class="h-7 w-28 rounded bg-emerald-500/10 border border-emerald-500/35 text-[9px] font-mono flex items-center justify-center text-emerald-400 font-semibold"
+            >
+              [✓ Confirmar y Guardar]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pantalla 4: Dashboard de Pendientes -->
+      <div class="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-zinc-850 pb-2.5">
+          <span class="text-xs font-bold text-zinc-200 font-mono">[Pantalla 4] Dashboard de Pendientes</span>
+          <span
+            class="text-[9px] font-mono text-emerald-400 bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10"
+            >HU-05 + HU-06</span
+          >
+        </div>
+
+        <!-- Wireframe mock body -->
+        <div class="border border-dashed border-zinc-700/60 rounded-xl p-4 bg-zinc-900/10 space-y-4 text-center">
+          <div
+            class="flex items-center justify-between border-b border-dashed border-zinc-800 pb-2 text-[9px] font-mono text-zinc-600"
+          >
+            <span>[Tareas Guardadas]</span>
+            <span>Orden: [Fecha Límite Ascendente]</span>
+          </div>
+
+          {/* Tasks list with checkboxes */}
+          <div class="space-y-1.5 text-left text-[9px] font-mono text-zinc-400">
+            <div class="flex items-center gap-2 p-2 rounded bg-zinc-950/40 border border-dashed border-zinc-850">
+              <span
+                class="w-3.5 h-3.5 border border-dashed border-zinc-700 rounded flex items-center justify-center text-[8px] text-transparent"
+                >✓</span
+              >
+              <div class="flex-1 flex justify-between">
+                <span class="text-zinc-300 font-medium">Migrar base de datos a IndexedDB</span>
+                <span class="text-zinc-500 font-bold">2026-05-30</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded bg-zinc-950/40 border border-dashed border-zinc-850">
+              <span
+                class="w-3.5 h-3.5 border border-dashed border-zinc-700 rounded flex items-center justify-center text-[8px] text-transparent"
+                >✓</span
+              >
+              <div class="flex-1 flex justify-between">
+                <span class="text-zinc-300 font-medium">Definir proveedor de LLM con cliente</span>
+                <span class="text-zinc-500 font-bold">2026-06-02</span>
+              </div>
+            </div>
+            <div
+              class="flex items-center gap-2 p-2 rounded bg-zinc-950/40 border border-dashed border-zinc-850 opacity-60"
+            >
+              <span
+                class="w-3.5 h-3.5 border border-dashed border-emerald-500/40 rounded bg-emerald-500/10 flex items-center justify-center text-[8px] text-emerald-400 font-bold"
+                >✓</span
+              >
+              <div class="flex-1 flex justify-between line-through">
+                <span class="text-zinc-500">Diseñar wireframe de baja fidelidad</span>
+                <span class="text-zinc-600 font-bold">2026-05-27</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats quick overview */}
+          <div
+            class="border-t border-dashed border-zinc-800 pt-2 flex justify-between items-center text-[8px] font-mono text-zinc-500"
+          >
+            <span>Completadas: 1/3</span>
+            <span>Pendientes: 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flows connector text description -->
+    <div class="rounded-xl border border-zinc-800 bg-zinc-900/20 p-5 space-y-3 font-sans text-xs text-zinc-400">
+      <h4 class="font-bold text-zinc-200">Flujo General del Software</h4>
+      <p class="leading-relaxed">
+        El flujo se diseña de manera lineal e intuitiva:
+        <br />
+        1. El usuario arriba a la **Landing Page (Home)** donde lee las bondades de automatización del acta.
+        <br />
+        2. Presiona "Iniciar" y accede a la **Grabación de Sesión (Consola)**. Acepta permisos de voz e inicia la transcripción
+        en vivo.
+        <br />
+        3. Al presionar "Finalizar", el sistema procesa el texto en segundo plano y muestra el **Resumen de Extracción LLM**
+        donde el usuario edita o depura los acuerdos.
+        <br />
+        4. Al confirmar, las tareas son guardadas en base de datos local y renderizadas en tiempo real en el **Dashboard de
+        Pendientes** organizadas cronológicamente para evitar pérdidas de plazos.
+      </p>
+    </div>
+
+    <!-- Client approval footnote footer -->
+    <footer class="text-center py-6 border-t border-zinc-800/80 font-mono text-[10px] text-zinc-500">
+      Low Fidelity — Iteración 1. Aprobado por: <span class="text-zinc-300 font-semibold">Ariel Rosas (Cliente)</span>.
+    </footer>
+  </div>
+</AppLayout>
