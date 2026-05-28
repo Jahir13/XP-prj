@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import { $runtimeStories, updateStoryStatus } from '../../store/stories';
+import { $currentUser } from '../../store/auth';
 import {
   DndContext,
   DragOverlay,
@@ -105,12 +106,12 @@ const columnConfig: Record<ColumnId, { label: string; accent: string; dotColor: 
 
 export default function IterationBoard({ initialStories, iteration }: Props) {
   const runtimeStories = useStore($runtimeStories);
+  const currentUser = useStore($currentUser);
 
   const stories = useMemo(() => {
     if (typeof window === 'undefined' || runtimeStories.length === 0) {
       return initialStories;
     }
-    // Map Schema to IterationBoard StoryItem
     return runtimeStories.map((s) => ({
       id: s.id,
       title: s.title,
@@ -124,6 +125,7 @@ export default function IterationBoard({ initialStories, iteration }: Props) {
   }, [runtimeStories, initialStories]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -159,6 +161,15 @@ export default function IterationBoard({ initialStories, iteration }: Props) {
     setActiveId(null);
     if (!over) return;
 
+    // Role check: Only Programmer/Tester (Kevin, Jhonathan) can move cards
+    if (currentUser?.role !== 'Programmer/Tester') {
+      setRoleError(
+        'Acceso Denegado: Solo los roles Programador/Tester (Kevin Palacios o Jhonathan Pulig) pueden reorganizar o mover historias de usuario en la iteración.',
+      );
+      setTimeout(() => setRoleError(null), 4000);
+      return;
+    }
+
     const activeStoryId = active.id as string;
     const overId = over.id as string;
 
@@ -179,6 +190,12 @@ export default function IterationBoard({ initialStories, iteration }: Props) {
 
   return (
     <div>
+      {roleError && (
+        <div className="mb-4 text-xs text-rose-400 font-mono bg-rose-500/10 border border-rose-500/25 p-3 rounded-lg animate-pulse">
+          ⚠️ {roleError}
+        </div>
+      )}
+
       {/* Velocity Header */}
       <div
         className={`mb-6 p-4 rounded-xl border backdrop-blur-sm transition-colors duration-300 ${

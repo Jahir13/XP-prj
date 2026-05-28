@@ -6,7 +6,7 @@ import { $runtimeLogs } from '../../store/logs';
 interface BuildRecord {
   buildNumber: number;
   time: string;
-  status: 'Passed' | 'Failed';
+  status: 'Passed' | 'Failed' | 'Running';
   duration: string;
   triggeredBy: string;
   reason?: string;
@@ -22,9 +22,15 @@ export default function CIPipeline() {
   >('idle');
   const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
   const [builds, setBuilds] = useState<BuildRecord[]>([
-    { buildNumber: 3, time: '22/5/2026, 00:45:00', status: 'Passed', duration: '9.2s', triggeredBy: 'David Kim' },
-    { buildNumber: 2, time: '21/5/2026, 20:30:12', status: 'Passed', duration: '8.7s', triggeredBy: 'Carol Wu' },
-    { buildNumber: 1, time: '21/5/2026, 10:14:45', status: 'Passed', duration: '10.1s', triggeredBy: 'Carol Wu' },
+    {
+      buildNumber: 3,
+      time: '22/5/2026, 00:45:00',
+      status: 'Running',
+      duration: 'En curso...',
+      triggeredBy: 'Kevin Palacios',
+    },
+    { buildNumber: 2, time: '21/5/2026, 20:30:12', status: 'Passed', duration: '8.7s', triggeredBy: 'Jhonathan Pulig' },
+    { buildNumber: 1, time: '21/5/2026, 10:14:45', status: 'Passed', duration: '10.1s', triggeredBy: 'Kevin Palacios' },
   ]);
 
   // Compute stats for Quality Lock
@@ -166,6 +172,7 @@ export default function CIPipeline() {
   const statusTranslations = {
     Passed: 'Exitoso',
     Failed: 'Fallido',
+    Running: 'En Curso',
   };
 
   return (
@@ -383,7 +390,9 @@ export default function CIPipeline() {
                         className={`text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded ${
                           b.status === 'Passed'
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            : b.status === 'Running'
+                              ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 animate-pulse'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                         }`}
                       >
                         {statusTranslations[b.status]}

@@ -4,7 +4,7 @@ import { $sessionHistory } from '../../store/pairSession';
 
 interface TeamMember {
   name: string;
-  role: 'Coach' | 'Client' | 'Programmer' | 'Tester' | 'Tracker';
+  role: 'Coach' | 'Gestor' | 'Cliente' | 'Programmer/Tester' | 'Tracker';
   description: string;
   avatar: string;
   weeklyHours: number; // Seed baseline hours
@@ -25,7 +25,7 @@ export default function TeamDashboard() {
     },
     {
       name: 'Jahir Rocha',
-      role: 'Client',
+      role: 'Gestor',
       description:
         'Gestor del proyecto, también conocido como Big Boss o Jefe. Conecta a los interesados con el equipo y lidera la dirección del proyecto.',
       avatar: '👑',
@@ -33,7 +33,7 @@ export default function TeamDashboard() {
     },
     {
       name: 'Ariel Rosas',
-      role: 'Client',
+      role: 'Cliente',
       description:
         'Cliente del proyecto. Define los alcances de las tarjetas de historias de usuario, los valores de negocio y acepta las iteraciones funcionales.',
       avatar: '💼',
@@ -41,7 +41,7 @@ export default function TeamDashboard() {
     },
     {
       name: 'Kevin Palacios',
-      role: 'Programmer',
+      role: 'Programmer/Tester',
       description:
         'Estima la complejidad de las historias de usuario, escribe pruebas unitarias automatizadas (TDD), programa en pareja diariamente y refactoriza el código.',
       avatar: '💻',
@@ -49,7 +49,7 @@ export default function TeamDashboard() {
     },
     {
       name: 'Jhonathan Pulig',
-      role: 'Tester',
+      role: 'Programmer/Tester',
       description:
         'Apoya al cliente en la redacción de criterios de aceptación de alta cobertura. Valida los entornos de prueba automatizados y los lanzamientos.',
       avatar: '🔍',
@@ -67,7 +67,9 @@ export default function TeamDashboard() {
 
   // Form states for adding member
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'Coach' | 'Client' | 'Programmer' | 'Tester' | 'Tracker'>('Programmer');
+  const [role, setRole] = useState<'Coach' | 'Gestor' | 'Cliente' | 'Programmer/Tester' | 'Tracker'>(
+    'Programmer/Tester',
+  );
   const [description, setDescription] = useState('');
   const [avatar, setAvatar] = useState('💻');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -75,15 +77,23 @@ export default function TeamDashboard() {
   // Role translations mapping
   const roleTranslations: Record<string, string> = {
     Coach: 'Coach (Entrenador)',
-    Client: 'Cliente',
-    Programmer: 'Programador',
-    Tester: 'Tester (Probador)',
+    Gestor: 'Gestor (Project Manager)',
+    Cliente: 'Cliente',
+    'Programmer/Tester': 'Programador / Tester',
     Tracker: 'Tracker (Rastreador)',
   };
 
   // Compute actual weekly hours from pair logs
   const teamWithPairLogs = useMemo(() => {
     return team.map((member) => {
+      // Pacing hours restricted: Ariel and Santiago are not pairable, their hours are rendered as 0
+      if (member.name === 'Ariel Rosas' || member.name === 'Santiago Pinta') {
+        return {
+          ...member,
+          actualHours: 0,
+        };
+      }
+
       // Find all pair sessions for this member
       const pairLogs = history.filter((h) => h.driver === member.name || h.navigator === member.name);
       const pairHours = pairLogs.reduce((sum, h) => sum + h.durationMinutes, 0) / 60;
@@ -221,16 +231,14 @@ export default function TeamDashboard() {
                     <select
                       id="team-role"
                       value={role}
-                      onChange={(e) =>
-                        setRole(e.target.value as 'Coach' | 'Client' | 'Programmer' | 'Tester' | 'Tracker')
-                      }
+                      onChange={(e) => setRole(e.target.value as any)}
                       className="w-full px-3 py-2 text-xs rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 focus:border-indigo-500 focus:outline-none transition-colors"
                     >
-                      <option value="Programmer">Programador (Desarrollador)</option>
-                      <option value="Client">Cliente (Product Owner)</option>
+                      <option value="Programmer/Tester">Programador / Tester</option>
+                      <option value="Cliente">Cliente</option>
                       <option value="Coach">Coach (Entrenador Ágil)</option>
-                      <option value="Tester">Tester (Aseguramiento de Calidad)</option>
                       <option value="Tracker">Tracker (Auditor de Métricas)</option>
+                      <option value="Gestor">Gestor</option>
                     </select>
                   </div>
                 </div>
@@ -249,10 +257,10 @@ export default function TeamDashboard() {
                       onChange={(e) => setAvatar(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 focus:border-indigo-500 focus:outline-none transition-colors"
                     >
-                      <option value="💻">💻 Avatar de Programador</option>
+                      <option value="💻">💻 Avatar de Programador/Tester</option>
                       <option value="🧙‍♀️">🧙‍♀️ Avatar de Coach</option>
-                      <option value="👑">👑 Avatar de Cliente</option>
-                      <option value="🔍">🔍 Avatar de Tester</option>
+                      <option value="👑">👑 Avatar de Gestor</option>
+                      <option value="💼">💼 Avatar de Cliente</option>
                       <option value="📊">📊 Avatar de Tracker</option>
                     </select>
                   </div>
@@ -313,9 +321,7 @@ export default function TeamDashboard() {
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">{member.avatar}</span>
                     <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-                      {member.name === 'Jahir Rocha'
-                        ? 'Gestor (Big Boss / Jefe)'
-                        : roleTranslations[member.role] || member.role}
+                      {roleTranslations[member.role] || member.role}
                     </span>
                   </div>
 

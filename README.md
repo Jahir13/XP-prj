@@ -240,9 +240,9 @@ El panel de control (`/dashboard`) te da una vista general del proyecto:
 ## 🧑‍🤝‍🧑 Equipo XP Pioneers
 
 | Miembro              | Rol XP             |
-| -------------------- | ------------------ |
+| -------------------- | ------------------ | --- |
 | Christian Puchaicela | Coach (Entrenador) |
-| Jahir Rocha          | Cliente            |
+| Jahir Rocha          | Gestor             | n   |
 | Ariel Rosas          | Cliente            |
 | Kevin Palacios       | Programador        |
 | Jhonathan Pulig      | Tester             |

@@ -74,8 +74,8 @@ const navGroups = [
   {
     label: 'Testing',
     items: [
-      { href: undefined, label: 'Plan de pruebas', icon: 'check-square' },
-      { href: undefined, label: 'Pruebas funcionales y de integración', icon: 'check-square' },
+      { href: '/tests?tab=plan', label: 'Plan de pruebas', icon: 'check-square' },
+      { href: '/tests?tab=e2e', label: 'Pruebas funcionales y de integración', icon: 'check-square' },
     ],
   },
   {
@@ -83,7 +83,7 @@ const navGroups = [
     items: [
       { href: `${pPrefix}/ci`, label: 'CI/CD', icon: 'activity' },
       { href: `${pPrefix}/compliance`, label: 'Cumplimiento XP', icon: 'shield-check' },
-      { href: undefined, label: 'feedback', icon: 'message' },
+      { href: '/compliance/feedback', label: 'Feedback', icon: 'message' },
     ],
   },
 ];

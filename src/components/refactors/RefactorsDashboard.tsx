@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import { $runtimeLogs, addLog, updateLogStatus } from '../../store/logs';
 import { $runtimeStories } from '../../store/stories';
+import { $currentUser } from '../../store/auth';
 
 const TEAM_MEMBERS = [
   'Christian Puchaicela',
@@ -26,6 +27,7 @@ const typeTranslations: Record<string, string> = {
 export default function RefactorsDashboard() {
   const logs = useStore($runtimeLogs);
   const stories = useStore($runtimeStories);
+  const currentUser = useStore($currentUser);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -34,6 +36,7 @@ export default function RefactorsDashboard() {
   const [relatedStory, setRelatedStory] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
 
   // Filter refactoring logs
   const debtItems = useMemo(() => {
@@ -41,7 +44,6 @@ export default function RefactorsDashboard() {
   }, [logs]);
 
   // Compute Codebase Health Score
-  // Base: 100, drops per open items based on priority (High: -20, Medium: -10, Low: -5)
   const healthMetrics = useMemo(() => {
     let score = 100;
     let openCount = 0;
@@ -50,10 +52,14 @@ export default function RefactorsDashboard() {
     debtItems.forEach((item) => {
       if (item.status === 'Open') {
         openCount++;
-        // We can simulate priority based on title content or type
-        const isHigh = item.title.toLowerCase().includes('card') || item.title.toLowerCase().includes('shared');
+        const isHigh =
+          item.title.toLowerCase().includes('duplicación') ||
+          item.title.toLowerCase().includes('card') ||
+          item.title.toLowerCase().includes('shared');
         const isMedium =
-          item.title.toLowerCase().includes('store') || item.title.toLowerCase().includes('initialization');
+          item.title.toLowerCase().includes('nanostores') ||
+          item.title.toLowerCase().includes('store') ||
+          item.title.toLowerCase().includes('initialization');
 
         if (isHigh) score -= 20;
         else if (isMedium) score -= 10;
@@ -81,11 +87,14 @@ export default function RefactorsDashboard() {
     }
 
     const highPriority = openDebts.find(
-      (d) => d.title.toLowerCase().includes('card') || d.title.toLowerCase().includes('shared'),
+      (d) =>
+        d.title.toLowerCase().includes('duplicación') ||
+        d.title.toLowerCase().includes('card') ||
+        d.title.toLowerCase().includes('shared'),
     );
     if (highPriority) {
       return {
-        title: 'Alto Riesgo: Duplicación de Estilos de Tarjeta',
+        title: 'Alto Riesgo: Duplicación en lógica de grabación',
         desc: `Refactorice la deuda técnica abierta "${highPriority.title}" de inmediato. Considere emparejar a Kevin Palacios y Christian Puchaicela para resolver esto.`,
       };
     }
@@ -100,6 +109,14 @@ export default function RefactorsDashboard() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+
+    if (currentUser?.role !== 'Programmer/Tester') {
+      setRoleError(
+        'Acceso Denegado: Solo los programadores/testers autorizados pueden registrar nuevas deudas técnicas.',
+      );
+      setTimeout(() => setRoleError(null), 4000);
+      return;
+    }
 
     addLog({
       title,
@@ -117,6 +134,15 @@ export default function RefactorsDashboard() {
   };
 
   const handleToggleStatus = (id: string, currentStatus: 'Open' | 'Resolved') => {
+    // Only Programmer/Tester (Kevin, Jhonathan) can resolve debt
+    if (currentUser?.role !== 'Programmer/Tester') {
+      setRoleError(
+        'Acceso Denegado: Solo los programadores/testers autorizados (Kevin Palacios o Jhonathan Pulig) pueden resolver o reabrir deuda técnica.',
+      );
+      setTimeout(() => setRoleError(null), 4000);
+      return;
+    }
+
     const nextStatus = currentStatus === 'Open' ? 'Resolved' : 'Open';
     updateLogStatus(id, nextStatus);
   };
@@ -146,6 +172,12 @@ export default function RefactorsDashboard() {
           {isFormOpen ? 'Cerrar Formulario' : 'Registrar Deuda Técnica'}
         </button>
       </div>
+
+      {roleError && (
+        <div className="text-xs text-rose-400 font-mono bg-rose-500/10 border border-rose-500/25 p-3 rounded-lg animate-pulse">
+          ⚠️ {roleError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Health Score & Coach Advice */}
@@ -354,9 +386,14 @@ export default function RefactorsDashboard() {
 
             <div className="divide-y divide-zinc-800/50 max-h-[480px] overflow-y-auto">
               {debtItems.map((item) => {
-                const isHigh = item.title.toLowerCase().includes('card') || item.title.toLowerCase().includes('shared');
+                const isHigh =
+                  item.title.toLowerCase().includes('duplicación') ||
+                  item.title.toLowerCase().includes('card') ||
+                  item.title.toLowerCase().includes('shared');
                 const isMedium =
-                  item.title.toLowerCase().includes('store') || item.title.toLowerCase().includes('initialization');
+                  item.title.toLowerCase().includes('nanostores') ||
+                  item.title.toLowerCase().includes('store') ||
+                  item.title.toLowerCase().includes('initialization');
 
                 let priorityLabel = 'Low';
                 let priorityBadgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
@@ -368,6 +405,8 @@ export default function RefactorsDashboard() {
                   priorityLabel = 'Medium';
                   priorityBadgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
                 }
+
+                const displayId = item.id.toUpperCase();
 
                 return (
                   <div
@@ -402,9 +441,9 @@ export default function RefactorsDashboard() {
 
                       <div>
                         <span
-                          className={`text-xs font-medium block ${item.status === 'Resolved' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}
+                          className={`text-xs font-semibold block ${item.status === 'Resolved' ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}
                         >
-                          {item.title}
+                          [{displayId}] {item.title}
                         </span>
 
                         <div className="flex items-center gap-2 mt-1">

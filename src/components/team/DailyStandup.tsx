@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 interface Member {
   name: string;
@@ -24,13 +24,55 @@ export default function DailyStandup({ team }: { team: Member[] }) {
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
+  // Sort and canonicalize team in strict XP hierarchy:
+  // 1. Coach (Christian), 2. Gestor (Jahir), 3. Programmer/Tester (Kevin, Jhonathan), 4. Tracker (Santiago), 5. Cliente (Ariel)
+  const sortedTeam = useMemo(() => {
+    const canonicalMembers = team.map((member) => {
+      let canonicalRole = member.role;
+      if (member.name === 'Jahir Rocha') {
+        canonicalRole = 'Gestor';
+      } else if (member.name === 'Ariel Rosas' || member.role === 'Client') {
+        canonicalRole = 'Cliente';
+      } else if (
+        member.name === 'Kevin Palacios' ||
+        member.name === 'Jhonathan Pulig' ||
+        member.role === 'Programmer' ||
+        member.role === 'Tester'
+      ) {
+        canonicalRole = 'Programmer/Tester';
+      } else if (member.role === 'Tracker') {
+        canonicalRole = 'Tracker';
+      }
+
+      return {
+        name: member.name,
+        role: canonicalRole,
+      };
+    });
+
+    const hierarchy: Record<string, number> = {
+      Coach: 1,
+      Gestor: 2,
+      'Programmer/Tester': 3,
+      Tracker: 4,
+      Cliente: 5,
+    };
+
+    return [...canonicalMembers].sort((a, b) => {
+      const rankA = hierarchy[a.role] || 99;
+      const rankB = hierarchy[b.role] || 99;
+      if (rankA !== rankB) return rankA - rankB;
+      return a.name.localeCompare(b.name);
+    });
+  }, [team]);
+
   // Role translations mapping
   const roleTranslations: Record<string, string> = {
     Coach: 'Coach (Entrenador)',
-    Programmer: 'Programador',
+    Gestor: 'Gestor (Project Manager)',
+    'Programmer/Tester': 'Programador / Tester',
     Tracker: 'Tracker (Rastreador)',
-    Tester: 'Tester (Probador)',
-    Client: 'Cliente',
+    Cliente: 'Cliente',
   };
 
   // Load history from localStorage on mount
@@ -64,7 +106,6 @@ export default function DailyStandup({ team }: { team: Member[] }) {
 
   const handleSpeakerSelect = (idx: number) => {
     setActiveSpeakerIdx(idx);
-    // Find if there is already an entry for this person today in history, or clear inputs
     setYesterdayText('');
     setTodayText('');
     setBlockersText('');
@@ -74,7 +115,7 @@ export default function DailyStandup({ team }: { team: Member[] }) {
     e.preventDefault();
     if (activeSpeakerIdx === null) return;
 
-    const speaker = team[activeSpeakerIdx];
+    const speaker = sortedTeam[activeSpeakerIdx];
     const todayStr = new Date().toISOString().split('T')[0];
 
     const newEntry: StandupEntry = {
@@ -85,7 +126,6 @@ export default function DailyStandup({ team }: { team: Member[] }) {
       blockers: blockersText || 'Ninguno',
     };
 
-    // Save and filter out any existing entry for this speaker today to prevent duplicates
     const updatedHistory = [
       newEntry,
       ...standupHistory.filter((h) => !(h.date === todayStr && h.speaker === speaker.name)),
@@ -94,13 +134,11 @@ export default function DailyStandup({ team }: { team: Member[] }) {
     setStandupHistory(updatedHistory);
     localStorage.setItem('xp_standup_history', JSON.stringify(updatedHistory));
 
-    // Clear inputs
     setYesterdayText('');
     setTodayText('');
     setBlockersText('');
 
-    // Advance to next speaker or finish standup
-    if (activeSpeakerIdx < team.length - 1) {
+    if (activeSpeakerIdx < sortedTeam.length - 1) {
       setActiveSpeakerIdx(activeSpeakerIdx + 1);
     } else {
       setActiveSpeakerIdx(null);
@@ -156,8 +194,8 @@ export default function DailyStandup({ team }: { team: Member[] }) {
       </div>
 
       {/* Grid of Team Members */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {team.map((member, idx) => {
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        {sortedTeam.map((member, idx) => {
           const hasSpoken = todayEntries.some((h) => h.speaker === member.name);
           const isActive = activeSpeakerIdx === idx;
 
@@ -208,10 +246,10 @@ export default function DailyStandup({ team }: { team: Member[] }) {
           <div className="flex justify-between items-center border-b border-zinc-800/60 pb-3">
             <div>
               <span className="text-xs font-mono uppercase text-indigo-400 font-semibold">Orador Activo</span>
-              <h3 className="text-base font-bold text-zinc-200 mt-0.5">{team[activeSpeakerIdx].name}</h3>
+              <h3 className="text-base font-bold text-zinc-200 mt-0.5">{sortedTeam[activeSpeakerIdx].name}</h3>
             </div>
             <span className="text-xs font-mono text-zinc-500">
-              Orador {activeSpeakerIdx + 1} de {team.length}
+              Orador {activeSpeakerIdx + 1} de {sortedTeam.length}
             </span>
           </div>
 
@@ -262,7 +300,7 @@ export default function DailyStandup({ team }: { team: Member[] }) {
               type="submit"
               className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-xs font-semibold text-white shadow-lg shadow-indigo-500/10 cursor-pointer"
             >
-              {activeSpeakerIdx < team.length - 1 ? 'Guardar y Siguiente' : 'Finalizar Standup'}
+              {activeSpeakerIdx < sortedTeam.length - 1 ? 'Guardar y Siguiente' : 'Finalizar Standup'}
             </button>
           </div>
         </form>

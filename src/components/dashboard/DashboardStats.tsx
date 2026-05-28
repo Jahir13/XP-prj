@@ -30,9 +30,9 @@ interface Props {
 
 const roleTranslations: Record<string, string> = {
   Coach: 'Coach (Entrenador)',
-  Client: 'Cliente',
-  Programmer: 'Programador',
-  Tester: 'Tester (Probador)',
+  Gestor: 'Gestor (Project Manager)',
+  Cliente: 'Cliente',
+  'Programmer/Tester': 'Programador / Tester',
   Tracker: 'Tracker (Rastreador)',
 };
 
