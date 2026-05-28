@@ -76,7 +76,7 @@ export default function DashboardStats({ initialStories, initialIterations, init
   const iterations = useStore($iterations);
 
   // Selected story to display inside drawer
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [selectedStory, setSelectedStory] = useState<any | null>(null);
 
   // System Metaphor Banner collapse state
   const [hideMetaphor, setHideMetaphor] = useState(() => {
@@ -358,7 +358,7 @@ export default function DashboardStats({ initialStories, initialIterations, init
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {iterations.map((iter) => {
-              const iterStories = stories.filter((s) => {
+              const iterStories = stories.filter((s: any) => {
                 const storyIter = s.iteration || s.iterationId || '';
                 return (
                   storyIter === `iteration-${iter.number}` ||

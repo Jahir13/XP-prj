@@ -11,6 +11,23 @@ export interface DebtItem {
   status: 'Open' | 'Resolved';
   relatedStory?: string;
   participants?: string[];
+
+  // Code traceability fields
+  descripcion?: string;
+  prioridad?: 'Alta' | 'Media' | 'Baja';
+  historiaId?: string;
+  estado?: 'Pendiente' | 'En Curso' | 'Resuelto' | 'Backlog';
+  responsableId?: string;
+  githubRepo?: string;
+  githubFiles?: Array<{
+    path: string;
+    description: string;
+    githubUrl: string;
+    lineStart?: number;
+    lineEnd?: number;
+  }>;
+  githubCommit?: string;
+  codeSnippet?: string;
 }
 
 const STORAGE_KEY = 'xp-flow-logs';

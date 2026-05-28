@@ -112,6 +112,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-02',
@@ -123,6 +125,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-03',
@@ -134,6 +138,8 @@ describe('stories store', () => {
         isTDD: false,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-04',
@@ -145,6 +151,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-05',
@@ -156,6 +164,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-06',
@@ -167,6 +177,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
       {
         id: 'HU-07',
@@ -178,6 +190,8 @@ describe('stories store', () => {
         isTDD: true,
         acceptanceCriteria: [],
         createdBy: 'Client' as const,
+        businessValue: 3,
+        risk: 'Low' as const,
       },
     ];
 

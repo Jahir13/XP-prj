@@ -309,3 +309,25 @@ export interface WsStandupEvent extends WsEvent {
   type: 'standup:submitted';
   payload: { entryId: string; userName: string };
 }
+
+export interface GithubFileRef {
+  path: string;
+  description: string;
+  githubUrl: string;
+  lineStart?: number;
+  lineEnd?: number;
+}
+
+export interface DeudaTecnica {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  prioridad: 'Alta' | 'Media' | 'Baja';
+  historiaId: string;
+  estado: 'Pendiente' | 'En Curso' | 'Resuelto' | 'Backlog';
+  responsableId?: string;
+  githubRepo?: string;
+  githubFiles?: GithubFileRef[];
+  githubCommit?: string;
+  codeSnippet?: string;
+}

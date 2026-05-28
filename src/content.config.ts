@@ -60,6 +60,27 @@ const logs = defineCollection({
     durationMinutes: z.number().optional(),
     status: z.enum(['Open', 'Resolved']).default('Open'),
     relatedStory: z.string().optional(),
+
+    // Code traceability fields
+    descripcion: z.string().optional(),
+    prioridad: z.enum(['Alta', 'Media', 'Baja']).optional(),
+    historiaId: z.string().optional(),
+    estado: z.enum(['Pendiente', 'En Curso', 'Resuelto', 'Backlog']).optional(),
+    responsableId: z.string().optional(),
+    githubRepo: z.string().optional(),
+    githubFiles: z
+      .array(
+        z.object({
+          path: z.string(),
+          description: z.string(),
+          githubUrl: z.string(),
+          lineStart: z.number().optional(),
+          lineEnd: z.number().optional(),
+        }),
+      )
+      .optional(),
+    githubCommit: z.string().optional(),
+    codeSnippet: z.string().optional(),
   }),
 });
 
