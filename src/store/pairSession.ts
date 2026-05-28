@@ -1,3 +1,6 @@
+// DATA AUDIT: Contains PairSessionState, PairSessionLog and actions ($pairSession, $sessionHistory).
+// Status: REAL project data (the 4 canonical pair programming sessions seeded, and strict validation enforced).
+
 import { atom, map } from 'nanostores';
 
 export interface PairSessionState {
@@ -20,6 +23,61 @@ export interface PairSessionLog {
 
 const STORAGE_KEY = 'xp-flow-pair-session';
 const HISTORY_KEY = 'xp-flow-pair-history';
+
+export const ELIGIBLE_PAIRS = ['Christian Puchaicela', 'Jahir Rocha', 'Kevin Palacios', 'Jhonathan Pulig'];
+
+export function validatePair(driver: string, navigator: string): string | null {
+  if (!driver || !navigator) return 'Ambos participantes son requeridos.';
+  if (driver === navigator) return 'El Conductor y el Navegador no pueden ser la misma persona.';
+  if (!ELIGIBLE_PAIRS.includes(driver)) {
+    return 'Este miembro no puede participar en sesiones de programación en pareja según las reglas XP del equipo.';
+  }
+  if (!ELIGIBLE_PAIRS.includes(navigator)) {
+    return 'Este miembro no puede participar en sesiones de programación en pareja según las reglas XP del equipo.';
+  }
+  return null;
+}
+
+function getSeedHistory(): PairSessionLog[] {
+  return [
+    {
+      id: 'session-seed-1',
+      driver: 'Kevin Palacios',
+      navigator: 'Christian Puchaicela',
+      startTime: new Date('2026-05-02T10:00:00Z').getTime(),
+      endTime: new Date('2026-05-02T11:30:00Z').getTime(),
+      durationMinutes: 90,
+      relatedStory: 'HU-01',
+    },
+    {
+      id: 'session-seed-2',
+      driver: 'Jhonathan Pulig',
+      navigator: 'Jahir Rocha',
+      startTime: new Date('2026-05-03T14:00:00Z').getTime(),
+      endTime: new Date('2026-05-03T16:00:00Z').getTime(),
+      durationMinutes: 120,
+      relatedStory: 'HU-02',
+    },
+    {
+      id: 'session-seed-3',
+      driver: 'Christian Puchaicela',
+      navigator: 'Jhonathan Pulig',
+      startTime: new Date('2026-05-18T09:00:00Z').getTime(),
+      endTime: new Date('2026-05-18T11:30:00Z').getTime(),
+      durationMinutes: 150,
+      relatedStory: 'HU-04',
+    },
+    {
+      id: 'session-seed-4',
+      driver: 'Kevin Palacios',
+      navigator: 'Jahir Rocha',
+      startTime: new Date('2026-05-20T15:00:00Z').getTime(),
+      endTime: new Date('2026-05-20T18:00:00Z').getTime(),
+      durationMinutes: 180,
+      relatedStory: 'HU-05',
+    },
+  ];
+}
 
 function loadSession(): PairSessionState {
   if (typeof window === 'undefined') return getDefaultSession();
@@ -46,7 +104,13 @@ function loadHistory(): PairSessionLog[] {
     const saved = localStorage.getItem(HISTORY_KEY);
     if (saved) return JSON.parse(saved);
   } catch {}
-  return [];
+
+  // Save seed history so it persists
+  const seed = getSeedHistory();
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(seed));
+  }
+  return seed;
 }
 
 export const $pairSession = map<PairSessionState>(loadSession());
@@ -63,6 +127,10 @@ if (typeof window !== 'undefined') {
 }
 
 export function startSession(driver: string, navigator: string) {
+  const err = validatePair(driver, navigator);
+  if (err) {
+    throw new Error(err);
+  }
   $pairSession.setKey('isActive', true);
   $pairSession.setKey('driver', driver);
   $pairSession.setKey('navigator', navigator);

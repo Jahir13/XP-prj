@@ -1,29 +1,27 @@
 ---
-metaphor: 'The Factory Floor'
+metaphor: 'Secretario Inteligente de Reuniones'
 teamName: 'XP Pioneers'
 roles:
   - name: 'Christian Puchaicela'
     role: 'Coach'
   - name: 'Jahir Rocha'
-    role: 'Client'
+    role: 'Gestor'
   - name: 'Ariel Rosas'
-    role: 'Client'
+    role: 'Cliente'
   - name: 'Kevin Palacios'
-    role: 'Programmer'
+    role: 'Programmer/Tester'
   - name: 'Jhonathan Pulig'
-    role: 'Tester'
+    role: 'Programmer/Tester'
   - name: 'Santiago Pinta'
     role: 'Tracker'
 cadence: '1 week'
 sustainablePaceHours: 40
 ---
 
-## System Metaphor: The Factory Floor
+## Metáfora del Sistema: Secretario Inteligente de Reuniones
 
-Our software system is like a **factory floor** where each component is a workstation. User stories are **work orders** that flow through the stations. Pair programming is two operators working the same machine. The iteration is a **production run**, and our velocity is the **throughput**.
+Nuestra metáfora del sistema es **"Secretario Inteligente de Reuniones"**. El software funciona captando todo lo hablado en una reunión, ordenando los compromisos y manteniéndolos visibles para el equipo, actuando como un asistente inteligente que garantiza la efectividad de la colaboración.
 
-This metaphor helps the team communicate about:
-
-- **Bottlenecks** = slow components or blocked stories
-- **Quality Control** = testing and refactoring
-- **Assembly Line** = the flow from backlog to done
+- **Conductor / Navegador** = dos operadores cooperando activamente en la captura o codificación de la sesión de pareja.
+- **Deuda Técnica** = compromisos o refactorizaciones abiertas por resolver para mantener la salud del código.
+- **Velocidad** = el rendimiento y avance real medido del equipo XP Pioneers.

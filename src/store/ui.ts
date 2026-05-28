@@ -1,3 +1,6 @@
+// DATA AUDIT: Contains UI control atoms like $isClientMode.
+// Status: REAL project state (non-fictional local reactive layout variables).
+
 import { atom } from 'nanostores';
 
 export const $isClientMode = atom<boolean>(false);

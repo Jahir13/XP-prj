@@ -1,3 +1,6 @@
+// DATA AUDIT: Contains RuntimeStory and related store actions ($runtimeStories, $storyFilter).
+// Status: REAL project data (HU-01 to HU-07 canonical stories migrated from reference repository).
+
 import { atom, map } from 'nanostores';
 
 export interface RuntimeStory {

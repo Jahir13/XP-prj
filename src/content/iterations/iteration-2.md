@@ -1,17 +1,19 @@
 ---
-name: 'Collaboration Sprint'
+name: 'Extracción y Gestión de Pendientes'
 number: 2
-startDate: 2025-05-08
-endDate: 2025-05-14
-velocity: 0
-capacity: 16
-status: 'Planning'
+startDate: 2026-05-15
+endDate: 2026-06-04
+velocity: 10
+capacity: 12
+status: 'Completed'
 ---
-
-## Iteration 2: Collaboration Sprint
 
 ### Goals
 
-- Build Pair Programming tracker
-- Implement Health Dashboard
-- Add Technical Debt register
+- Extracción automática de compromisos con LLM (HU-04)
+- Persistencia local de tareas (HU-05)
+- Panel visual de tareas pendientes (HU-06)
+
+### Retrospective Notes
+
+- Integración exitosa de Vitest para simular ejecuciones TDD rápidas.

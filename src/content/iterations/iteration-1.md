@@ -1,23 +1,19 @@
 ---
-name: 'Foundation Sprint'
+name: 'MVP Funcional'
 number: 1
-startDate: 2025-05-01
-endDate: 2025-05-07
-velocity: 8
-capacity: 16
-status: 'Active'
+startDate: 2026-05-01
+endDate: 2026-05-14
+velocity: 5
+capacity: 8
+status: 'Completed'
 ---
-
-## Iteration 1: Foundation Sprint
 
 ### Goals
 
-- Set up project infrastructure
-- Implement core story card UI
-- Begin Planning Game board
+- Captura de audio básica (HU-01)
+- Transcripción básica en tiempo real (HU-02)
 
 ### Retrospective Notes
 
-- Pair programming felt productive
-- TDD helped catch edge cases early
-- Need to improve estimation accuracy
+- Tasa de TDD al 100% en historias comprometidas.
+- Rotación de parejas fluida.

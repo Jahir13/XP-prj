@@ -35,7 +35,9 @@ export interface AuthResponse {
   user: User;
 }
 
-export type UserRole = 'Coach' | 'Client' | 'Programmer' | 'Tester' | 'Tracker';
+export type XPRole = 'Coach' | 'Gestor' | 'Cliente' | 'Programmer/Tester' | 'Tracker';
+
+export type UserRole = XPRole;
 
 export interface User {
   id: string;
@@ -45,6 +47,16 @@ export interface User {
   avatar?: string;
   createdAt: string;
 }
+
+export type TeamMember = {
+  id: string;
+  name: string;
+  xpRole: XPRole;
+  canBePaired: boolean; // true solo para Coach, Gestor, Programador/Tester
+  canBeAssigned: boolean; // true solo para Programador/Tester
+  email?: string;
+  avatar?: string;
+};
 
 export interface Project {
   id: string;

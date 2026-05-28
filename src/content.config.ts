@@ -41,7 +41,7 @@ const project = defineCollection({
       .array(
         z.object({
           name: z.string(),
-          role: z.enum(['Coach', 'Client', 'Programmer', 'Tester', 'Tracker']),
+          role: z.enum(['Coach', 'Gestor', 'Cliente', 'Programmer/Tester', 'Tracker']),
         }),
       )
       .default([]),

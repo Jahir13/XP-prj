@@ -1,28 +1,23 @@
 ---
 type: 'pair-session'
-title: 'Story Card UI Implementation'
-date: 2025-05-02
+title: 'HU-01 Iniciar y Finalizar Sesión de Reunión'
+date: 2026-05-02
 participants:
-  - 'Carol Wu'
-  - 'David Kim'
-durationMinutes: 120
+  - 'Kevin Palacios'
+  - 'Christian Puchaicela'
+durationMinutes: 90
 status: 'Resolved'
-relatedStory: 'user-story-1'
+relatedStory: 'HU-01'
 ---
 
-## Pair Session: Story Card UI
+## Pair Session: Iniciar y Finalizar Sesión de Reunión
 
-**Driver:** Carol Wu  
-**Navigator:** David Kim  
-**Duration:** 2 hours
+**Driver:** Kevin Palacios  
+**Navigator:** Christian Puchaicela  
+**Duration:** 90 minutes  
+**Iteration:** MVP Funcional
 
 ### What we accomplished
 
-- Implemented the StoryCard component with flip animation
-- Added business value star rating
-- Created risk badge with color coding
-
-### Observations
-
-- Swapping roles every 25 minutes (Pomodoro) worked well
-- Navigator caught a CSS specificity issue early
+- Escribimos las pruebas TDD para asegurar que la grabación de audio se inicie y finalice correctamente.
+- Implementamos la lógica de captura usando la Web Audio API.

@@ -1,23 +1,23 @@
 ---
 type: 'pair-session'
-title: 'Planning Board Drag and Drop'
-date: 2025-05-03
+title: 'HU-02 Transcripción Básica de Audio en Tiempo Real'
+date: 2026-05-03
 participants:
-  - 'David Kim'
-  - 'Carol Wu'
-durationMinutes: 90
+  - 'Jhonathan Pulig'
+  - 'Jahir Rocha'
+durationMinutes: 120
 status: 'Resolved'
-relatedStory: 'user-story-2'
+relatedStory: 'HU-02'
 ---
 
-## Pair Session: Planning Board DnD
+## Pair Session: Transcripción Básica en Tiempo Real
 
-**Driver:** David Kim  
-**Navigator:** Carol Wu  
-**Duration:** 1.5 hours
+**Driver:** Jhonathan Pulig  
+**Navigator:** Jahir Rocha  
+**Duration:** 120 minutes  
+**Iteration:** MVP Funcional
 
 ### What we accomplished
 
-- Set up @dnd-kit with sortable columns
-- Implemented collision detection for card placement
-- Added velocity header with over-capacity warning
+- Configuramos e integramos la Web Speech API para transcribir el flujo de audio capturado en tiempo real de forma dinámica.
+- Validamos la visualización incremental del texto transcrito en pantalla.

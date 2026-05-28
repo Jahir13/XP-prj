@@ -1,3 +1,6 @@
+// DATA AUDIT: Contains DebtItem and related store actions ($runtimeLogs).
+// Status: REAL project data (DT-01 to DT-03 canonical technical debt logs migrated from reference repository).
+
 import { atom } from 'nanostores';
 
 export interface DebtItem {
