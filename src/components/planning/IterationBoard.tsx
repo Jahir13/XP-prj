@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import { $runtimeStories, updateStoryStatus } from '../../store/stories';
-import { $currentUser } from '../../store/auth';
 import {
   DndContext,
   DragOverlay,
@@ -106,7 +105,6 @@ const columnConfig: Record<ColumnId, { label: string; accent: string; dotColor: 
 
 export default function IterationBoard({ initialStories, iteration }: Props) {
   const runtimeStories = useStore($runtimeStories);
-  const currentUser = useStore($currentUser);
 
   const stories = useMemo(() => {
     if (typeof window === 'undefined' || runtimeStories.length === 0) {
@@ -161,19 +159,8 @@ export default function IterationBoard({ initialStories, iteration }: Props) {
     setActiveId(null);
     if (!over) return;
 
-    // Role check: Programmers, Gestor, and Coach can move cards
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
-
-    const isAllowed =
-      allowedRoles.includes(roleLower) ||
-      allowedRoles.includes(xpRoleLower) ||
-      nameLower === 'kevin palacios' ||
-      nameLower === 'jhonathan pulig' ||
-      nameLower === 'jahir rocha' ||
-      nameLower === 'christian puchaicela';
+    // Role check: anyone can move cards
+    const isAllowed = true;
 
     if (!isAllowed) {
       setRoleError(

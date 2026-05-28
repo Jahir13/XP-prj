@@ -3,7 +3,6 @@ import { useStore } from '@nanostores/react';
 import type { RuntimeStory } from '../../store/stories';
 import { updateStory } from '../../store/stories';
 import { $sessionHistory } from '../../store/pairSession';
-import { $currentUser } from '../../store/auth';
 
 interface Props {
   story: RuntimeStory | null;
@@ -149,23 +148,11 @@ const possibleFunctionalTests: Record<string, string[]> = {
 
 export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
   const history = useStore($sessionHistory);
-  const currentUser = useStore($currentUser);
   const [roleError, setRoleError] = useState<string | null>(null);
 
   const isAuthorizedToEdit = useMemo(() => {
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-
-    return (
-      roleLower === 'cliente' ||
-      roleLower === 'gestor' ||
-      xpRoleLower === 'cliente' ||
-      xpRoleLower === 'gestor' ||
-      nameLower === 'ariel rosas' ||
-      nameLower === 'jahir rocha'
-    );
-  }, [currentUser]);
+    return true;
+  }, []);
   const [checkedCriteria, setCheckedCriteria] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -199,18 +186,7 @@ export default function StoryDetailDrawer({ story, onClose, onEdit }: Props) {
   const associatedPairs = history.filter((log) => log.relatedStory?.toLowerCase() === story.id.toLowerCase());
 
   const toggleCriterion = (index: number) => {
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
-
-    const isAllowed =
-      allowedRoles.includes(roleLower) ||
-      allowedRoles.includes(xpRoleLower) ||
-      nameLower === 'kevin palacios' ||
-      nameLower === 'jhonathan pulig' ||
-      nameLower === 'jahir rocha' ||
-      nameLower === 'christian puchaicela';
+    const isAllowed = true;
 
     if (!isAllowed) {
       setRoleError('Acceso Denegado: Solo los programadores/testers, el Gestor o el Coach pueden validar criterios.');

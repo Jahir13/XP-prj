@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import { $runtimeStories, addStory, updateStory, updateStoryStatus, type RuntimeStory } from '../../store/stories';
-import { $currentUser } from '../../store/auth';
 import StoryCard from './StoryCard';
 import StoryForm from './StoryForm';
 import StoryDetailDrawer from './StoryDetailDrawer';
@@ -139,7 +138,6 @@ function KanbanCardOverlay({ story }: { story: RuntimeStory }) {
 
 export default function StoriesList({ initialStories, iteration }: Props) {
   const runtimeStories = useStore($runtimeStories);
-  const currentUser = useStore($currentUser);
 
   // Search & Filter state
   const [search, setSearch] = useState('');
@@ -180,50 +178,16 @@ export default function StoriesList({ initialStories, iteration }: Props) {
 
   // Authorization checks
   const isAuthorizedToCreate = useMemo(() => {
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-
-    return (
-      roleLower === 'cliente' ||
-      roleLower === 'gestor' ||
-      xpRoleLower === 'cliente' ||
-      xpRoleLower === 'gestor' ||
-      nameLower === 'ariel rosas' ||
-      nameLower === 'jahir rocha'
-    );
-  }, [currentUser]);
+    return true;
+  }, []);
 
   const isAuthorizedToEdit = useMemo(() => {
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-
-    return (
-      roleLower === 'cliente' ||
-      roleLower === 'gestor' ||
-      xpRoleLower === 'cliente' ||
-      xpRoleLower === 'gestor' ||
-      nameLower === 'ariel rosas' ||
-      nameLower === 'jahir rocha'
-    );
-  }, [currentUser]);
+    return true;
+  }, []);
 
   const canMoveCards = useMemo(() => {
-    const roleLower = currentUser?.role?.toLowerCase() || '';
-    const xpRoleLower = currentUser?.xpRole?.toLowerCase() || '';
-    const nameLower = currentUser?.name?.toLowerCase().trim() || '';
-    const allowedRoles = ['programmer/tester', 'programador/tester', 'gestor', 'coach'];
-
-    return (
-      allowedRoles.includes(roleLower) ||
-      allowedRoles.includes(xpRoleLower) ||
-      nameLower === 'kevin palacios' ||
-      nameLower === 'jhonathan pulig' ||
-      nameLower === 'jahir rocha' ||
-      nameLower === 'christian puchaicela'
-    );
-  }, [currentUser]);
+    return true;
+  }, []);
 
   const handleSave = (storyData: Omit<RuntimeStory, 'id'> & { id?: string }) => {
     if (storyData.id) {
