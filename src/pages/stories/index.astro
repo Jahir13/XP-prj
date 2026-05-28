@@ -4,6 +4,16 @@ import StoriesList from '../../components/stories/StoriesList';
 import { getCollection } from 'astro:content';
 
 const stories = await getCollection('stories');
+const iterations = await getCollection('iterations');
+const activeIteration = iterations.find((i) => i.data.status === 'Active');
+
+const iterationData = activeIteration
+  ? {
+      name: activeIteration.data.name,
+      number: activeIteration.data.number,
+      capacity: activeIteration.data.capacity,
+    }
+  : { name: 'Iteración 3', number: 3, capacity: 10 };
 
 // Map static stories to the format needed by the React component
 const staticStories = stories.map((s) => ({
@@ -23,5 +33,5 @@ const staticStories = stories.map((s) => ({
 ---
 
 <AppLayout title="User Stories" subtitle="The Card File" currentPath="/stories">
-  <StoriesList client:load initialStories={staticStories} />
+  <StoriesList client:load initialStories={staticStories} iteration={iterationData} />
 </AppLayout>
