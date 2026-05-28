@@ -85,3 +85,14 @@ export function updateStory(id: string, updates: Partial<RuntimeStory>) {
 export function removeStory(id: string) {
   $runtimeStories.set($runtimeStories.get().filter((s) => s.id !== id));
 }
+
+export function calculateIterationPoints(stories: RuntimeStory[], iterationNumber: number): number {
+  return stories
+    .filter((s) => {
+      const storyIter = s.iteration || '';
+      return (
+        storyIter === `iteration-${iterationNumber}` || storyIter.replace('iteration-', '') === String(iterationNumber)
+      );
+    })
+    .reduce((sum, s) => sum + s.points, 0);
+}

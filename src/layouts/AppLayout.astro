@@ -15,6 +15,8 @@ const { title, subtitle = 'XP-Flow', currentPath, projectId } = Astro.props;
 
 const stories = await getCollection('stories');
 const logs = await getCollection('logs');
+const iterations = await getCollection('iterations');
+
 const staticStories = stories.map((s) => ({
   id: s.id,
   title: s.data.title,
@@ -29,6 +31,7 @@ const staticStories = stories.map((s) => ({
   createdBy: s.data.createdBy,
   estimatedBy: s.data.estimatedBy,
 }));
+
 const staticLogs = logs.map((l) => ({
   id: l.id,
   title: l.data.title,
@@ -37,6 +40,18 @@ const staticLogs = logs.map((l) => ({
   status: l.data.status,
   relatedStory: l.data.relatedStory,
   participants: l.data.participants,
+}));
+
+const staticIterations = iterations.map((i) => ({
+  id: i.id,
+  projectId: i.data.projectId || '1',
+  name: i.data.name,
+  number: i.data.number,
+  startDate: i.data.startDate.toISOString(),
+  endDate: i.data.endDate.toISOString(),
+  velocity: i.data.velocity,
+  capacity: i.data.capacity,
+  status: i.data.status,
 }));
 
 const pPrefix = projectId ? `/projects/${projectId}` : '';
@@ -127,7 +142,12 @@ const iconPaths: Record<string, string> = {
   </head>
   <body class="noise-bg min-h-screen antialiased">
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
-    <StoreInitializer client:load staticStories={staticStories} staticLogs={staticLogs} />
+    <StoreInitializer
+      client:load
+      staticStories={staticStories}
+      staticLogs={staticLogs}
+      staticIterations={staticIterations}
+    />
 
     <div class="flex min-h-screen">
       <!-- Sidebar -->
