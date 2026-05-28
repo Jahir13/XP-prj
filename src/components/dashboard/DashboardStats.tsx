@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
-import { $runtimeStories, calculateIterationPoints } from '../../store/stories';
+import { $runtimeStories, calculateIterationPoints, type RuntimeStory } from '../../store/stories';
 import { $sessionHistory } from '../../store/pairSession';
 import { $runtimeLogs } from '../../store/logs';
 import { $currentUser } from '../../store/auth';
 import { $isClientMode } from '../../store/ui';
 import { $iterations } from '../../store/iterations';
-import type { Story } from '../../types';
+import type { Story, Iteration } from '../../types';
 import StoryDetailDrawer from '../stories/StoryDetailDrawer';
 import ErrorBoundary from '../ui/ErrorBoundary';
 
@@ -23,7 +23,7 @@ interface LogEntry {
 
 interface Props {
   initialStories: Story[];
-  initialIterations: any[];
+  initialIterations: Iteration[];
   initialLogs: LogEntry[];
   project: {
     metaphor: string;
@@ -73,10 +73,10 @@ export default function DashboardStats({ initialStories, initialIterations, init
   const runtimeLogs = useStore($runtimeLogs);
   const currentUser = useStore($currentUser);
   const isClientMode = useStore($isClientMode);
-  const iterations = useStore($iterations);
+  const runtimeIterations = useStore($iterations);
 
   // Selected story to display inside drawer
-  const [selectedStory, setSelectedStory] = useState<any | null>(null);
+  const [selectedStory, setSelectedStory] = useState<RuntimeStory | null>(null);
 
   // System Metaphor Banner collapse state
   const [hideMetaphor, setHideMetaphor] = useState(() => {
@@ -92,12 +92,20 @@ export default function DashboardStats({ initialStories, initialIterations, init
   }, [currentUser]);
 
   // Merge stories
-  const stories = useMemo(() => {
+  const stories = useMemo((): RuntimeStory[] => {
     if (typeof window === 'undefined' || runtimeStories.length === 0) {
-      return initialStories;
+      return initialStories as unknown as RuntimeStory[];
     }
     return runtimeStories;
   }, [runtimeStories, initialStories]);
+
+  // Merge iterations
+  const iterations = useMemo((): Iteration[] => {
+    if (typeof window === 'undefined' || runtimeIterations.length === 0) {
+      return initialIterations;
+    }
+    return runtimeIterations;
+  }, [runtimeIterations, initialIterations]);
 
   // Pair Sessions Merged State
   const pairSessions = useMemo(() => {
@@ -273,7 +281,14 @@ export default function DashboardStats({ initialStories, initialIterations, init
                   .map((story) => (
                     <div
                       key={story.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSelectedStory(story)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setSelectedStory(story);
+                        }
+                      }}
                       className="p-4 rounded-lg bg-zinc-950/60 border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col gap-2 cursor-pointer"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -300,7 +315,14 @@ export default function DashboardStats({ initialStories, initialIterations, init
                   .map((story) => (
                     <div
                       key={story.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSelectedStory(story)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setSelectedStory(story);
+                        }
+                      }}
                       className="p-4 rounded-lg bg-zinc-950/60 border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col gap-2 cursor-pointer"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -317,7 +339,7 @@ export default function DashboardStats({ initialStories, initialIterations, init
           </div>
 
           {/* Drawer for Story Details */}
-          {selectedStory && <StoryDetailDrawer story={selectedStory as any} onClose={() => setSelectedStory(null)} />}
+          {selectedStory && <StoryDetailDrawer story={selectedStory} onClose={() => setSelectedStory(null)} />}
         </div>
       </ErrorBoundary>
     );
@@ -358,14 +380,14 @@ export default function DashboardStats({ initialStories, initialIterations, init
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {iterations.map((iter) => {
-              const iterStories = stories.filter((s: any) => {
+              const iterStories = stories.filter((s) => {
                 const storyIter = s.iteration || s.iterationId || '';
                 return (
                   storyIter === `iteration-${iter.number}` ||
                   storyIter.replace('iteration-', '') === String(iter.number)
                 );
               });
-              const points = iterStories.reduce((sum, s) => sum + s.points, 0);
+              const points = calculateIterationPoints(stories, iter.number);
               const completedPoints = iterStories
                 .filter((s) => s.status === 'Done')
                 .reduce((sum, s) => sum + s.points, 0);
@@ -434,7 +456,14 @@ export default function DashboardStats({ initialStories, initialIterations, init
                         iterStories.map((story) => (
                           <div
                             key={story.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setSelectedStory(story)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setSelectedStory(story);
+                              }
+                            }}
                             className="flex items-center justify-between p-2 rounded bg-zinc-950/40 border border-zinc-800/60 hover:bg-zinc-800/20 hover:border-zinc-700 transition-all cursor-pointer text-[11px]"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
@@ -730,7 +759,7 @@ export default function DashboardStats({ initialStories, initialIterations, init
         </div>
 
         {/* Drawer for Story Details */}
-        {selectedStory && <StoryDetailDrawer story={selectedStory as any} onClose={() => setSelectedStory(null)} />}
+        {selectedStory && <StoryDetailDrawer story={selectedStory} onClose={() => setSelectedStory(null)} />}
       </div>
     </ErrorBoundary>
   );

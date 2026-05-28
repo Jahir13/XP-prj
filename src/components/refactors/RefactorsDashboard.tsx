@@ -474,7 +474,7 @@ export default function RefactorsDashboard() {
                 const displayId = item.id.toUpperCase();
                 const relatedStoryId = item.historiaId || item.relatedStory;
                 const isTraceabilityOpen = !!expandedTraceability[item.id];
-                const isEnCurso = item.estado === 'En Curso' || (item as any).status === 'En Curso';
+                const isEnCurso = item.estado === 'En Curso';
 
                 return (
                   <div key={item.id} className="hover:bg-zinc-800/10 transition-colors">

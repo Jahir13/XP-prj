@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { XPUser, User } from '../types';
+import type { XPUser, XPRole } from '../types';
 import { usersApi } from '../api/usersApi';
 import { DEV_CREDENTIALS } from '../lib/dev-credentials';
 
@@ -99,8 +99,9 @@ const envMapping: Record<string, { emailKey: string; passwordKey: string }> = {
 export function getCredentials(id: string) {
   const mapping = envMapping[id];
   if (!mapping) return null;
-  const email = import.meta.env[mapping.emailKey] || (DEV_CREDENTIALS as any)[id]?.email;
-  const password = import.meta.env[mapping.passwordKey] || (DEV_CREDENTIALS as any)[id]?.password;
+  const devCreds = DEV_CREDENTIALS as Record<string, { email?: string; password?: string }>;
+  const email = import.meta.env[mapping.emailKey] || devCreds[id]?.email;
+  const password = import.meta.env[mapping.passwordKey] || devCreds[id]?.password;
   return { email, password };
 }
 
@@ -138,7 +139,7 @@ export async function fetchCurrentUser() {
       id: user.id,
       name: user.name,
       email: user.email,
-      xpRole: user.role as any,
+      xpRole: user.role as XPRole,
       role: user.role,
       canBePaired: ['Coach', 'Gestor', 'Programmer/Tester', 'Programador/Tester'].includes(user.role),
       canBeAssigned: ['Programmer/Tester', 'Programador/Tester'].includes(user.role),
