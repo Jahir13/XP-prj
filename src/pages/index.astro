@@ -1,3 +1,362 @@
 ---
-return Astro.redirect('/dashboard');
+import LandingLayout from '../layouts/LandingLayout.astro';
+import DemoMetrics from '../components/dashboard/DemoMetrics';
+
+const team = [
+  {
+    name: 'Christian Puchaicela',
+    role: 'Coach (Entrenador)',
+    initial: 'CP',
+    desc: 'Guía al equipo en la disciplina de las prácticas XP.',
+  },
+  {
+    name: 'Jahir Rocha',
+    role: 'Cliente',
+    initial: 'JR',
+    desc: 'Define las historias de usuario y prioriza el valor de negocio.',
+  },
+  {
+    name: 'Ariel Rosas',
+    role: 'Cliente',
+    initial: 'AR',
+    desc: 'Valida los criterios de aceptación y guía el alcance de la iteración.',
+  },
+  {
+    name: 'Kevin Palacios',
+    role: 'Programador',
+    initial: 'KP',
+    desc: 'Escribe código limpio guiado por TDD y programación en pareja.',
+  },
+  {
+    name: 'Jhonathan Pulig',
+    role: 'Tester',
+    initial: 'JP',
+    desc: 'Garantiza la calidad simulando suites de pruebas funcionales.',
+  },
+  {
+    name: 'Santiago Pinta',
+    role: 'Tracker (Rastreador)',
+    initial: 'SP',
+    desc: 'Mide la velocidad del equipo y mantiene el ritmo sostenible.',
+  },
+];
+
+const values = [
+  {
+    title: 'Comunicación',
+    icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+    desc: 'El desarrollo de software no ocurre en aislamiento. Fomentamos el flujo constante de ideas mediante programaciones en pareja, reuniones standup y retrospectivas integradas.',
+    color: 'text-indigo-400 border-indigo-500/20 bg-indigo-500/5',
+  },
+  {
+    title: 'Simplicidad',
+    icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+    desc: 'Hacemos lo más simple que pueda funcionar hoy. Diseñamos componentes modulares e interfaces sin fricción para eliminar la deuda técnica antes de que aparezca.',
+    color: 'text-sky-400 border-sky-500/20 bg-sky-500/5',
+  },
+  {
+    title: 'Retroalimentación',
+    icon: 'M22 12h-4l-3 9L9 3l-3 9H2',
+    desc: 'Medimos de forma continua y automática. Con pipelines de CI/CD al instante, revisiones de código dinámicas y métricas de velocidad actualizadas en tiempo real.',
+    color: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5',
+  },
+  {
+    title: 'Coraje',
+    icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4',
+    desc: 'Refactorizamos sin miedo ante nuevos requerimientos. Respaldados por una sólida suite de TDD que nos asegura que la aplicación siempre mantenga su integridad.',
+    color: 'text-rose-400 border-rose-500/20 bg-rose-500/5',
+  },
+];
+
+const practices = [
+  {
+    name: 'Historias de Usuario',
+    icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+    desc: 'Tarjetas dinámicas en 3D que representan los requerimientos con estimaciones Fibonacci y valor de negocio.',
+    href: '/stories',
+  },
+  {
+    name: 'Iteraciones',
+    icon: 'M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM3 9h18M9 21V9',
+    desc: 'Planifica y organiza el alcance del sprint con medidores visuales de la capacidad máxima del equipo.',
+    href: '/iterations',
+  },
+  {
+    name: 'Standup Diaria',
+    icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+    desc: 'Sincronización diaria rápida de 10 minutos con registro persistente y rotación automática de oradores.',
+    href: '/standup',
+  },
+  {
+    name: 'Programación en Pareja',
+    icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+    desc: 'Reloj y roles Driver/Navigator con matrices de rotación integradas para evitar silos de conocimiento.',
+    href: '/pairs',
+  },
+  {
+    name: 'Desarrollo Guiado por Pruebas (TDD)',
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    desc: 'Consola estilo Vitest y listados de verificación interactivos basados en los criterios de aceptación.',
+    href: '/tests',
+  },
+  {
+    name: 'CI/CD e Integración Continua',
+    icon: 'M22 12h-4l-3 9L9 3l-3 9H2',
+    desc: 'Pipelines que comprueban umbrales estrictos de calidad y cobertura antes de permitir despliegues.',
+    href: '/ci',
+  },
+];
 ---
+
+<LandingLayout title="El framework definitivo para Extreme Programming">
+  <!-- Nav Bar -->
+  <header class="sticky top-0 z-50 border-b border-zinc-800/60 bg-zinc-950/70 backdrop-blur-xl">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2.5">
+        <div class="flex h-8 w-8 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10">
+          <span class="font-mono text-sm font-bold text-indigo-400">XP</span>
+        </div>
+        <span class="text-sm font-semibold tracking-wider text-zinc-100">Flow</span>
+      </div>
+      <a
+        href="/dashboard"
+        class="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-500/10 hover:bg-indigo-600 hover:shadow-indigo-500/25 transition-all duration-200 cursor-pointer"
+        aria-label="Entrar al Panel de Control de XP-Flow"
+      >
+        Ir al Panel
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden py-20 lg:py-28 flex flex-col items-center justify-center text-center">
+    <!-- Background Accents -->
+    <div
+      class="absolute top-1/4 left-1/2 -z-10 h-72 w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-[120px]"
+    >
+    </div>
+    <div
+      class="absolute top-1/3 left-1/3 -z-10 h-48 w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-600/5 blur-[100px]"
+    >
+    </div>
+
+    <div class="mx-auto max-w-4xl px-6">
+      <!-- Metaphor tag -->
+      <span
+        class="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-indigo-400 mb-6"
+      >
+        ✨ DISEÑADO CON "THE FACTORY FLOOR"
+      </span>
+
+      <!-- Headline -->
+      <h1 class="text-4xl font-extrabold tracking-tight text-zinc-50 md:text-6xl lg:text-7xl leading-tight">
+        XP-Flow — El único framework de gestión diseñado desde adentro con <span
+          class="bg-gradient-to-r from-indigo-400 via-sky-400 to-indigo-500 bg-clip-text text-transparent"
+          >Extreme Programming</span
+        >
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="mx-auto mt-6 max-w-2xl text-base text-zinc-400 md:text-lg leading-relaxed">
+        Una plataforma construida aplicando con absoluto rigor las mismas prácticas metodológicas que gestiona:
+        desarrollo guiado por pruebas (TDD), programación en pareja e integración continua.
+      </p>
+
+      <!-- CTAs -->
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/dashboard"
+          class="inline-flex h-11 items-center justify-center rounded-xl bg-indigo-500 px-6 text-sm font-bold text-white shadow-xl shadow-indigo-500/20 hover:bg-indigo-600 hover:shadow-indigo-500/40 transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+          aria-label="Navegar al Panel de Control de XP-Flow"
+        >
+          Entrar al Panel
+        </a>
+        <a
+          href="/stories"
+          class="inline-flex h-11 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/60 px-6 text-sm font-semibold text-zinc-300 backdrop-blur-sm hover:border-zinc-700 hover:bg-zinc-800/80 transition-all duration-200 cursor-pointer"
+          aria-label="Ver el listado de historias de usuario"
+        >
+          Ver Historias de Usuario
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Valores Section -->
+  <section class="py-20 border-t border-zinc-900 bg-zinc-950/30">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest block mb-2"
+          >FILOSOFÍA DE TRABAJO</span
+        >
+        <h2 class="text-3xl font-bold tracking-tight text-zinc-100 md:text-4xl">Nuestros Valores Extremos</h2>
+        <p class="text-sm text-zinc-500 mt-2">
+          XP-Flow no es solo una herramienta, es un manifiesto vivo que implementa los pilares esenciales de XP.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {
+          values.map((v) => (
+            <div class="p-6 rounded-2xl border border-zinc-900 bg-zinc-900/20 flex flex-col justify-between hover:border-zinc-800 transition-all duration-300">
+              <div>
+                <div class={`w-10 h-10 rounded-xl flex items-center justify-center border ${v.color} mb-5`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d={v.icon} />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-zinc-100 mb-3">{v.title}</h3>
+                <p class="text-xs text-zinc-400 leading-relaxed">{v.desc}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Prácticas Section -->
+  <section class="py-20 border-t border-zinc-900 bg-zinc-950">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest block mb-2"
+          >HERRAMIENTAS INCLUIDAS</span
+        >
+        <h2 class="text-3xl font-bold tracking-tight text-zinc-100 md:text-4xl">Prácticas XP Integradas</h2>
+        <p class="text-sm text-zinc-500 mt-2">
+          Un flujo completo diseñado para implementar y medir la disciplina de desarrollo más ágil.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {
+          practices.map((p) => (
+            <a
+              href={p.href}
+              class="group p-6 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 hover:border-indigo-500/20 hover:bg-zinc-900/50 transition-all duration-300 cursor-pointer"
+              aria-label={`Ver sección de ${p.name}`}
+            >
+              <div class="flex items-start justify-between">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-zinc-800 bg-zinc-900/60 text-zinc-400 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-all duration-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d={p.icon} />
+                  </svg>
+                </div>
+                <span class="text-[9.5px] font-mono text-zinc-500 group-hover:text-indigo-400 transition-colors uppercase tracking-widest">
+                  EXPLORAR →
+                </span>
+              </div>
+              <h3 class="text-base font-bold text-zinc-200 mt-6 group-hover:text-zinc-50 transition-colors">
+                {p.name}
+              </h3>
+              <p class="text-xs text-zinc-400 mt-2.5 leading-relaxed">{p.desc}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Métricas Section -->
+  <section class="py-20 border-t border-zinc-900 bg-zinc-950/30">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest block mb-2"
+          >NÚMEROS CLAVE</span
+        >
+        <h2 class="text-3xl font-bold tracking-tight text-zinc-100 md:text-4xl">Nuestra Garantía de Calidad</h2>
+        <p class="text-sm text-zinc-500 mt-2">
+          Métricas calculadas y ejecutadas con precisión estricta y sin datos simulados.
+        </p>
+      </div>
+
+      <DemoMetrics client:visible />
+    </div>
+  </section>
+
+  <!-- Equipo Section -->
+  <section class="py-20 border-t border-zinc-900 bg-zinc-950">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest block mb-2"
+          >DESARROLLADORES</span
+        >
+        <h2 class="text-3xl font-bold tracking-tight text-zinc-100 md:text-4xl">Construido por XP Pioneers</h2>
+        <p class="text-sm text-zinc-500 mt-2">
+          El equipo multidisciplinario que concibió y codificó XP-Flow bajo metodologías de agilidad extrema.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        {
+          team.map((t) => (
+            <div class="p-5 rounded-2xl border border-zinc-900 bg-zinc-900/10 hover:border-zinc-800 transition-all duration-300 flex gap-4">
+              <div class="w-11 h-11 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm font-mono flex-shrink-0">
+                {t.initial}
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-zinc-200">{t.name}</h3>
+                <span class="text-[9.5px] font-mono text-indigo-400 font-semibold uppercase tracking-wider block mt-0.5">
+                  {t.role}
+                </span>
+                <p class="text-[11.5px] text-zinc-400 mt-2 leading-relaxed">{t.desc}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-zinc-900 bg-zinc-950 py-12">
+    <div class="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2">
+        <div class="flex h-6 w-6 items-center justify-center rounded bg-indigo-500/10 border border-indigo-500/20">
+          <span class="font-mono text-[10px] font-bold text-indigo-400">XP</span>
+        </div>
+        <span class="text-xs font-semibold text-zinc-400 tracking-wider">XP-Flow — 2026</span>
+      </div>
+
+      <div class="flex items-center gap-6 flex-wrap justify-center">
+        <a
+          href="https://github.com/Jahir13/XP-prj"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          aria-label="Ir al repositorio de GitHub de XP-Flow"
+        >
+          GitHub Repo
+        </a>
+        <a
+          href="/dashboard"
+          class="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          aria-label="Ir al Panel de Control de XP-Flow"
+        >
+          Panel de Control
+        </a>
+        <span class="text-xs text-zinc-600 font-mono">Factory Floor v1.0.0</span>
+      </div>
+    </div>
+  </footer>
+</LandingLayout>
