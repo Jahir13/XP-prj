@@ -223,6 +223,18 @@ El panel de control (`/dashboard`) te da una vista general del proyecto:
 
 ---
 
+## ⚙️ Configuración de Credenciales
+
+Para el desarrollo local, XP-Flow utiliza credenciales por rol configuradas a través de variables de entorno. Siga estos pasos para configurarlas:
+
+1. Copie el archivo de ejemplo:
+   ```sh
+   cp .env.credentials.example .env.credentials
+   ```
+2. Modifique el archivo `.env.credentials` con sus contraseñas locales. En desarrollo, si este archivo no se define, se utilizarán las credenciales locales de prueba definidas de forma segura en el proyecto.
+
+---
+
 ## 🧪 Comandos de Desarrollo
 
 | Comando             | Acción                                             |

@@ -9,6 +9,11 @@ dist/
 .env
 .env.*
 !.env.example
+.env.credentials
+.env.local
+.env.*.local
+.env.secrets
+src/lib/dev-credentials.ts
 
 # IDEs y editores
 .vscode/

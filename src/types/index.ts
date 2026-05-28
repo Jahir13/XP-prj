@@ -35,7 +35,7 @@ export interface AuthResponse {
   user: User;
 }
 
-export type XPRole = 'Coach' | 'Gestor' | 'Cliente' | 'Programmer/Tester' | 'Tracker';
+export type XPRole = 'Coach' | 'Gestor' | 'Cliente' | 'Programmer/Tester' | 'Programador/Tester' | 'Tracker';
 
 export type UserRole = XPRole;
 
@@ -43,6 +43,19 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role: UserRole;
+  avatar?: string;
+  createdAt: string;
+}
+
+export interface XPUser {
+  id: string;
+  name: string;
+  email: string;
+  xpRole: XPRole;
+  canBePaired: boolean;
+  canBeAssigned: boolean;
+  avatarInitials: string;
   role: UserRole;
   avatar?: string;
   createdAt: string;
